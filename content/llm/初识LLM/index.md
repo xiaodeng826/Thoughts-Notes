@@ -22,21 +22,21 @@ categories: []
 上述例子肯定和真实机制有出入，但我想表达的是LLM本质上其实是一个基于语言分布的概率预测模型。
 
 ## LLM完整的生命周期
-### Stage1
+### Stage1-building(构建)
 
   1. Data preparation & sampling（数据准备与采样）:决定了模型从哪些数据上学习token的分布规律。
   2. Attention mechanism（注意力机制）:这是现代LLM（基于Transformer架构）的核心。这个决定了模型该如何处理上下文，即“读”到一个词时还应该关注句中哪些词。
   3. LLM architecture（LLM架构）:具体的LLM的各个功能组件的搭配，设计
 
 这个阶段的模型的功能还没有加载，需要后续的Pretraining(预训练)阶段
-### Stage2
+### Stage2-Pretraining(预训练)
 
   1. Training loop（训练循环）：用Stage1的数据来训练模型，提取出token的分布规律。
   2. Model evaluation（模型评估）： 对模型进行测试，看是否具备语言组织能力，世界知识，逻辑能力
   3. Load pretrained weights（加载预训练权重）： 训练完成后，保存下来的模型参数就是“权重”。也就是已经得到了token的概率分布规律，而这些规律的体现形式就是模型参数。
 
 这个阶段结束后，会得到一个真正能语言对话的，有一定通识的LLM。可以视作一个通才。接下来的Finetuning（微调）阶段就是对模型能力的特化加强。
-### Stage3
+### Stage3-finetuning(微调)
 
   1. 构建分类器（Classifier）：用带有类别标签的数据集来继续训练模型，让模型能够分辨文本的好坏之类的特诊。
   2. 构建个人助理（Personal assistant）：用对话和指令数据来训练，让模型能够遵循指令。 
