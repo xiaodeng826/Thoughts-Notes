@@ -692,3 +692,40 @@ function deleteImage(rel) {
   fs.unlinkSync(abs);
   return { deleted: rel };
 }
+
+/* ============ 端口被占用时的友好处理 ============ */
+function pingSelf() {
+  return new Promise(function (resolve) {
+    const req = http.get({ host: "127.0.0.1", port: PORT, path: "/api/overview", timeout: 2000 }, function (res) {
+      let d = "";
+      res.on("data", function (c) { d += c; });
+      res.on("end", function () {
+        try { resolve(Array.isArray(JSON.parse(d).sections)); } catch (e) { resolve(false); }
+      });
+    });
+    req.on("error", function () { resolve(false); });
+    req.on("timeout", function () { req.destroy(); resolve(false); });
+  });
+}
+
+server.on("error", async function (e) {
+  if (e.code === "EADDRINUSE") {
+    const mine = await pingSelf();
+    console.log("");
+    if (mine) {
+      console.log("  管理后台已经在运行了，正在为你打开浏览器…");
+      console.log("  地址   " + ADMIN_URL);
+      console.log("");
+      console.log("  想重启：先关掉原来那个黑色窗口，或用「停止博客.bat」。");
+      if (process.argv.indexOf("--open") >= 0) openBrowser(ADMIN_URL);
+      setTimeout(function () { process.exit(0); }, 1500);
+      return;
+    }
+    console.log("  [X] 端口 " + PORT + " 被别的程序占用了。");
+    console.log("      换个端口：在「管理博客.bat」里改成  set BLOG_ADMIN_PORT=1415  再运行。");
+    console.log("");
+    process.exit(1);
+  }
+  console.error(e);
+  process.exit(1);
+});

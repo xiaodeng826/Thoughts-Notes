@@ -10,4 +10,4 @@ if errorlevel 1 (
   exit /b 1
 )
 node "%~dp0admin\server.js" --open
-pause
+if errorlevel 1 pause

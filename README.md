@@ -143,7 +143,8 @@ blog/
 │   ├─ menus.zh-cn.toml             ← 顶部导航菜单
 │   └─ markup.toml                  ← Markdown 渲染规则（基本不用动）
 ├─ 管理博客.bat                      ← ★ 双击进入图形化管理后台
-├─ 启动博客.bat / 停止博客.bat        ← 只想看效果时用这两个
+├─ 启动博客.bat                      ← 只看本地预览用这个
+├─ 停止博客.bat                      ← 一次关掉「预览 + 管理后台」
 ├─ admin/                           ← 管理后台（Node，零 npm 依赖）
 │   ├─ server.js                    ← 后台服务
 │   └─ public/                      ← 网页界面
@@ -320,6 +321,10 @@ git push
 **怎么换网站图标（favicon）？**
 替换 `static\` 下的 `favicon.ico`、`favicon-32x32.png`、`apple-touch-icon.png` 等文件。
 
+**双击「管理博客.bat」报端口 1414 被占用？**
+说明管理后台**已经在运行了**。重复双击是安全的：它会直接帮你打开浏览器，然后自己退出。
+想重启就先运行「停止博客.bat」，或关掉原来那个黑色窗口。
+（真被别的程序占用了，可以在 `管理博客.bat` 里加一行 `set BLOG_ADMIN_PORT=1415` 换端口。）
 **手动跑 hugo 报「Access is denied」？**
 加上 `--cacheDir .hugo-cache`，把缓存放进项目内，避开系统临时目录的权限问题
 （`preview.ps1` / `build.ps1` 已经内置了这个参数）。
