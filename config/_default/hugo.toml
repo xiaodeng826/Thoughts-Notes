@@ -20,6 +20,10 @@ enableEmoji = true
 buildDrafts = false      # 本地预览时用 -D 参数临时显示草稿，不必改这里
 buildFuture = false
 
+# 让 Hugo 从 git 提交记录里读取每篇文章的最后修改时间（"修改日期"就靠它）
+# 注意：必须保留完整的 git 历史，工作流里 actions/checkout 已配 fetch-depth: 0
+enableGitInfo = true
+
 # 每页文章数
 [pagination]
   pagerSize = 10

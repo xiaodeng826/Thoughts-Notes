@@ -62,7 +62,7 @@ fingerprintAlgorithm = "sha512"
 # ---------- 文章页 ----------
 [article]
   showDate = true
-  showDateUpdated = false
+  showDateUpdated = true          # 文章被改过时，额外显示「更新于」
   showAuthor = true
   showBreadcrumbs = true        # 顶部面包屑
   showReadingTime = true
