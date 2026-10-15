@@ -165,6 +165,7 @@ function listSections() {
       return {
         name: d.name,
         title: readScalar(lines, "title") || d.name,
+        description: readScalar(lines, "description") || doc.body.trim(),
         weight: Number(readScalar(lines, "weight")) || 100,
         published: posts.filter(function (p) { return !p.draft; }).length,
         drafts: posts.filter(function (p) { return p.draft; }).length,
@@ -288,9 +289,11 @@ function createSection(input) {
   const idx = path.join(CONTENT, name, "_index.md");
   if (fs.existsSync(idx)) throw new Error("板块已存在");
   fs.mkdirSync(path.join(CONTENT, name), { recursive: true });
-  const L = ["---", "title: " + yamlStr(input.title || name), "description: " + yamlStr(input.description || "")];
+  const desc = String(input.description || "").trim();
+  const L = ["---", "title: " + yamlStr(input.title || name), "description: " + yamlStr(desc)];
   if (input.weight) L.push("weight: " + Number(input.weight));
-  L.push("---", "", "");
+  // 简述同时写进正文：板块页模板渲染的是 .Content，只放 front matter 是看不到的
+  L.push("---", "", desc, "");
   fs.writeFileSync(idx, L.join("\n"), "utf8");
   syncMenu();
   return { name: name };
@@ -303,9 +306,13 @@ function updateSection(input) {
   const doc = splitDoc(fs.readFileSync(idx, "utf8"));
   const lines = doc.front.trim() ? doc.front.trim().split(/\r?\n/) : [];
   if (input.title !== undefined) setField(lines, "title", "title: " + yamlStr(input.title));
-  if (input.description !== undefined) setField(lines, "description", "description: " + yamlStr(input.description));
   if (input.weight !== undefined) setField(lines, "weight", "weight: " + Number(input.weight || 100));
-  fs.writeFileSync(idx, "---\n" + lines.join("\n") + "\n---\n\n" + doc.body.replace(/^\s*\n+/, ""), "utf8");
+  if (input.description !== undefined) setField(lines, "description", "description: " + yamlStr(input.description));
+  // 简述改了就同步更新正文，否则改了描述页面上看不出变化
+  const newBody = input.description !== undefined
+    ? String(input.description).trim()
+    : doc.body.replace(/^\s*\n+/, "").trim();
+  fs.writeFileSync(idx, "---\n" + lines.join("\n") + "\n---\n\n" + (newBody ? newBody + "\n" : ""), "utf8");
   syncMenu();
   return { name: name };
 }
@@ -509,6 +516,8 @@ const server = http.createServer(async function (req, res) {
         return json(res, 200, { ok: true });
       }
       case "POST /api/publish": return json(res, 200, await publish(body.message));
+      case "GET /api/tags": return json(res, 200, { items: listTags() });
+      case "POST /api/tag": return json(res, 200, saveTag(body));
       case "GET /api/images": return json(res, 200, { items: listImages(q.get("path") || "") });
       case "POST /api/image/delete": return json(res, 200, deleteImage(body.path));
       case "GET /api/trash": return json(res, 200, { items: listTrash() });
@@ -743,3 +752,43 @@ server.on("error", async function (e) {
   console.error(e);
   process.exit(1);
 });
+
+/* ============ 标签管理 ============ */
+function tagSlug(t) {
+  return String(t).trim().toLowerCase().replace(/\s+/g, "-").replace(/[\\/:*?"<>|#%{}^~`\[\];,]/g, "");
+}
+
+function listTags() {
+  const map = {};
+  listPosts().forEach(function (p) {
+    (p.tags || []).forEach(function (t) {
+      const name = String(t).trim();
+      if (!name) return;
+      if (!map[name]) map[name] = { name: name, slug: tagSlug(name), count: 0, description: "" };
+      map[name].count++;
+    });
+  });
+  Object.keys(map).forEach(function (k) {
+    const f = path.join(CONTENT, "tags", map[k].slug, "_index.md");
+    if (!fs.existsSync(f)) return;
+    const doc = splitDoc(fs.readFileSync(f, "utf8"));
+    const lines = doc.front.split(/\r?\n/);
+    map[k].description = (readScalar(lines, "description") || doc.body.trim() || "");
+  });
+  return Object.keys(map).map(function (k) { return map[k]; })
+    .sort(function (a, b) { return b.count - a.count || a.name.localeCompare(b.name); });
+}
+
+function saveTag(input) {
+  const name = String(input.name || "").trim();
+  if (!name) throw new Error("缺少标签名");
+  const slug = tagSlug(name);
+  if (!slug) throw new Error("这个标签名没法生成网址标识");
+  const desc = String(input.description || "").trim();
+  const dir = path.join(CONTENT, "tags", slug);
+  fs.mkdirSync(dir, { recursive: true });
+  // description 供搜索引擎读，正文供标签页显示
+  const out = "---\n" + "title: " + yamlStr(name) + "\n" + "description: " + yamlStr(desc) + "\n---\n\n" + (desc ? desc + "\n" : "");
+  fs.writeFileSync(path.join(dir, "_index.md"), out, "utf8");
+  return { name: name, slug: slug, path: path.relative(ROOT, path.join(dir, "_index.md")).replace(/\\/g, "/") };
+}

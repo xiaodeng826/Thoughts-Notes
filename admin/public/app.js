@@ -92,7 +92,9 @@ function renderSidebar() {
   STATE.sections.forEach(function (s) {
     const badge = s.published + (s.drafts ? " +" + s.drafts + "草" : "");
     html += '<li data-sec="' + esc(s.name) + '" class="' + (STATE.filter === s.name ? "active" : "") + '">' +
-      esc(s.title) + '<span class="cnt">' + badge + "</span></li>";
+      '<span class="sec-name">' + esc(s.title) + '</span>' +
+      '<span class="cnt">' + badge + '</span>' +
+      '<b class="sec-edit" data-edit="' + esc(s.name) + '" title="编辑 / 删除这个板块">…</b></li>';
   });
   ul.innerHTML = html;
   Array.prototype.forEach.call(ul.querySelectorAll("li"), function (li) {
@@ -102,6 +104,12 @@ function renderSidebar() {
       renderSidebar();
       renderTopbar();
       renderList();
+    };
+  });
+  Array.prototype.forEach.call(ul.querySelectorAll("[data-edit]"), function (b) {
+    b.onclick = function (ev) {
+      ev.stopPropagation();
+      editSectionDialog(b.getAttribute("data-edit"));
     };
   });
   $("#sideFoot").textContent = STATE.git.changes > 0
@@ -384,6 +392,50 @@ function newPostDialog() {
   };
 }
 
+/* ============ 编辑 / 删除板块 ============ */
+function editSectionDialog(name) {
+  const s = STATE.sections.filter(function (x) { return x.name === name; })[0];
+  if (!s) { toast("找不到这个板块", "err"); return; }
+  modal(
+    "<h3>编辑板块</h3>" +
+    '<div class="field"><label>名称（显示在导航上）</label><input id="esTitle" type="text" value="' + esc(s.title) + '"></div>' +
+    '<div class="field" style="margin-top:12px"><label>网址标识（不可修改）</label><input id="esName" type="text" value="' + esc(s.name) + '" disabled></div>' +
+    '<div class="field" style="margin-top:12px"><label>排序（数字越小越靠前）</label><input id="esWeight" type="text" value="' + (s.weight || 100) + '"></div>' +
+    '<div class="field" style="margin-top:12px"><label>板块简述（显示在板块页顶部）</label><textarea id="esDesc" style="min-height:80px">' + esc(s.description || "") + "</textarea></div>" +
+    '<p class="hint" style="margin-top:12px">网址标识不可改：改了会让这个板块下所有已发布文章的链接失效。<br>当前 ' +
+      (s.published + s.drafts) + " 篇文章，要删除板块需先清空它们。</p>" +
+    '<div class="modal-actions">' +
+      '<button class="btn danger" id="esDel">删除板块</button>' +
+      '<button class="btn" id="esCancel">取消</button>' +
+      '<button class="btn primary" id="esOk">保存</button>' +
+    "</div>"
+  );
+  $("#esCancel").onclick = closeModal;
+  $("#esOk").onclick = async function () {
+    try {
+      await api.post("/api/section", {
+        original: name, name: name,
+        title: $("#esTitle").value.trim(),
+        weight: Number($("#esWeight").value) || 100,
+        description: $("#esDesc").value.trim(),
+      });
+      closeModal();
+      toast("板块已更新", "ok");
+      await refresh();
+    } catch (e) { toast("保存失败：" + e.message, "err"); }
+  };
+  $("#esDel").onclick = async function () {
+    if (!confirm("删除板块「" + s.title + "」？\n\n会从 content/ 里移除这个板块目录，不可撤销。")) return;
+    try {
+      await api.post("/api/section/delete", { name: name });
+      closeModal();
+      toast("板块已删除", "ok");
+      if (STATE.filter === name) STATE.filter = "";
+      await refresh();
+    } catch (e) { toast("删除失败：" + e.message, "err"); }
+  };
+}
+
 /* ============ 新建板块 ============ */
 function newSectionDialog() {
   modal(
@@ -437,6 +489,48 @@ async function doPublish() {
   } catch (e) { toast("发布失败：" + e.message, "err"); }
   btn.disabled = false;
   btn.textContent = "🚀 发布到线上";
+}
+
+/* ============ 标签管理 ============ */
+async function showTags() {
+  let d;
+  try { d = await api.get("/api/tags"); }
+  catch (e) { toast("读取标签失败：" + e.message, "err"); return; }
+
+  const rows = d.items.length
+    ? d.items.map(function (t) {
+        return '<div class="tag-row">' +
+          '<div class="tag-head">' +
+            '<span class="tag">' + esc(t.name) + "</span>" +
+            '<span class="hint">' + t.count + " 篇 · /tags/" + esc(t.slug) + "/</span>" +
+          "</div>" +
+          '<input type="text" data-tag="' + esc(t.name) + '" value="' + esc(t.description) +
+            '" placeholder="给这个标签写一句简述（显示在标签页顶部）">' +
+        "</div>";
+      }).join("")
+    : '<div class="empty">还没有任何标签。在文章编辑器的「标签」里填上标签并保存后，这里就会自动出现。</div>';
+
+  modal(
+    "<h3>🏷️ 标签管理</h3>" +
+    '<p class="hint">简述会写进 <code>content/tags/&lt;标签&gt;/_index.md</code>，显示在该标签页面顶部，同时供搜索引擎使用。' +
+    "标签本身不需要手工创建——你在文章里填了什么标签，这里就有什么。</p>" +
+    '<div style="margin-top:14px;max-height:52vh;overflow:auto">' + rows + "</div>" +
+    '<div class="modal-actions"><button class="btn" id="tgCancel">关闭</button>' +
+      '<button class="btn primary" id="tgSave">保存全部</button></div>'
+  );
+  $("#tgCancel").onclick = closeModal;
+  $("#tgSave").onclick = async function () {
+    const inputs = document.querySelectorAll("[data-tag]");
+    let ok = 0, fail = 0;
+    for (let i = 0; i < inputs.length; i++) {
+      try {
+        await api.post("/api/tag", { name: inputs[i].getAttribute("data-tag"), description: inputs[i].value.trim() });
+        ok++;
+      } catch (e) { fail++; }
+    }
+    toast(fail ? ("已保存 " + ok + " 个，失败 " + fail + " 个") : ("已保存 " + ok + " 个标签"), fail ? "err" : "ok");
+    closeModal();
+  };
 }
 
 /* ============ 设置 ============ */
@@ -499,6 +593,7 @@ function boot() {
   $("#btnNewPost").onclick = newPostDialog;
   $("#btnNewSection").onclick = newSectionDialog;
   $("#btnTogglePreview").onclick = togglePreview;
+  $("#btnTags").onclick = showTags;
   $("#btnSettings").onclick = showSettings;
   $("#btnPublish").onclick = doPublish;
   $("#btnOpenSite").onclick = function () {
