@@ -218,6 +218,7 @@ async function openEditor(path, section) {
       '<div class="editor-actions">' +
         '<button class="btn primary" id="btnSave">💾 保存</button>' +
         '<button class="btn" id="btnSaveOpen">保存并看真效果</button>' +
+        '<button class="btn" id="btnLive">🔗 打开线上页面</button>' +
         '<span class="spacer"></span>' +
         '<button class="btn danger" id="btnDelete">🗑 删除这篇文章</button>' +
       "</div>" +
@@ -275,6 +276,18 @@ function wireEditor() {
     };
   }
   $("#btnDelete").onclick = function () { delPost(); };
+  const liveBtn = $("#btnLive");
+  if (liveBtn) {
+    liveBtn.title = STATE.editingLiveURL || "";
+    liveBtn.onclick = function () {
+      if (!STATE.editingLiveURL) { toast("没算出线上地址，请检查 hugo.toml 里的 baseURL", "err"); return; }
+      if ($("#fDraft") && $("#fDraft").checked) {
+        toast("这篇还是草稿，线上还没有它。取消勾选「草稿」并上传后再看。", "err");
+        return;
+      }
+      window.open(STATE.editingLiveURL, "_blank");
+    };
+  }
 
   /* ---- 图片上传：按钮 / 拖拽 / 粘贴 ---- */
   const ta = $("#fBody");
