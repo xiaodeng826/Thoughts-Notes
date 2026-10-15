@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>博客管理台</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand"><span>📝</span> 博客管理台</div>
+
+    <div class="side-block">
+      <div class="side-title">板块</div>
+      <ul id="sectionList" class="section-list"></ul>
+      <button id="btnNewSection" class="ghost-btn">＋ 新建板块</button>
+    </div>
+
+    <div class="side-block">
+      <div class="side-title">快捷操作</div>
+      <button id="btnNewPost" class="side-btn primary">✏️ 写新文章</button>
+      <button id="btnTogglePreview" class="side-btn">▶️ 启动预览</button>
+      <button id="btnOpenSite" class="side-btn">🌐 打开预览页</button>
+      <button id="btnSettings" class="side-btn">⚙️ 设置</button>
+    </div>
+
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1 id="viewTitle">全部文章</h1>
+      <div class="topbar-right">
+        <span id="gitBadge" class="badge">读取中…</span>
+        <button id="btnPublish" class="btn primary">🚀 发布到线上</button>
+      </div>
+    </header>
+    <section id="view" class="view"><div class="loading">加载中…</div></section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="modal" class="modal"><div class="modal-box" id="modalBox"></div></div>
+<script src="/app.js"></script>
+</body>
+</html>

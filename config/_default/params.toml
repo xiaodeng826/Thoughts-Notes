@@ -1,0 +1,136 @@
+# ============================================================
+#  主题行为配置  ·  params.toml
+#  这里每一项都有默认值兜底，删掉某行 = 回到主题默认
+#  完整选项清单：https://blowfish.page/zh-cn/docs/configuration/
+# ============================================================
+
+# ---------- 外观 ----------
+# 可选配色（改这一个词就能换整套配色）：
+# blowfish(蓝) congo(紫) ocean(海蓝) avocado(橄榄绿) autumn(秋橙)
+# fire(火红) forest(森绿) slate(石灰) terminal(终端绿) noir(黑白)
+# neon(霓虹) marvel(红蓝) one-light(浅素) github(灰白) princess(粉) bloody(暗红) burufugu(青)
+colorScheme = "congo"
+defaultAppearance = "light"     # 首次访问用 light 还是 dark
+autoSwitchAppearance = true     # 跟随系统深浅色自动切换
+
+# ---------- 功能开关 ----------
+enableSearch = true             # 站内搜索（⌘K / Ctrl+K 呼出，纯前端，零成本）
+enableCodeCopy = true           # 代码块右上角「复制」按钮（写技术笔记很有用）
+enableA11y = false              # 无障碍增强样式
+replyByEmail = false
+enableStructuredBreadcrumbs = false
+mainSections = ["essay", "tech", "reading", "life"]   # 板块列表，影响「最新文章」「相关文章」
+
+# 图片优化：默认开启（自动压缩/缩放），如遇到问题可置 true
+disableImageOptimization = false
+hotlinkFeatureImage = false
+
+# 全站背景图：所有页面的默认背景，可被单篇文章的 front matter 单独覆盖
+defaultBackgroundImage = "img/background.jpg"
+# 把上面的图铺成全站固定背景（主题会自动叠一层蒙版，保证文字可读）
+backgroundCanvas = true
+
+# 全站社交分享默认图（Open Graph）
+defaultSocialImage = "/android-chrome-512x512.png"
+
+# 指纹算法：sha512 / sha384 / sha256
+fingerprintAlgorithm = "sha512"
+
+# ---------- 顶栏 ----------
+[header]
+  layout = "fixed-fill-blur"    # basic / fixed / fixed-fill / fixed-gradient / fixed-fill-blur / floating
+  # mobileMenuStyle = "fullscreen"  # fullscreen / dropdown
+
+# ---------- 页脚 ----------
+[footer]
+  showMenu = true
+  showCopyright = true
+  showThemeAttribution = true
+  showAppearanceSwitcher = true  # 深浅色切换按钮
+  showScrollToTop = true
+
+# ---------- 首页 ----------
+[homepage]
+  layout = "hero"               # page / profile / hero / card / background / landing / custom
+  showRecent = true             # 显示最新文章
+  showRecentItems = 6
+  showMoreLink = false          # 顶部「文章」下拉菜单已覆盖导航，这里关掉避免重复
+  showMoreLinkDest = "/essay/"
+  cardView = false
+  # homepageImage = "img/cover.jpg"   # layout = hero / card 时用
+
+# ---------- 文章页 ----------
+[article]
+  showDate = true
+  showDateUpdated = false
+  showAuthor = true
+  showBreadcrumbs = true        # 顶部面包屑
+  showReadingTime = true
+  showWordCount = true
+  showReadingProgress = true    # 顶部阅读进度条
+  showTableOfContents = true    # 右侧目录
+  smartTOC = false              # 目录跟随滚动高亮（打开会更吃性能）
+  showHeadingAnchors = true     # 标题悬停出现锚点链接
+  showHero = true
+  heroStyle = "basic"           # basic / big / background / thumbAndBackground（后三种需配图）
+  showRelatedContent = true     # 文末「相关文章」
+  relatedContentLimit = 3
+  showTaxonomies = true         # 显示分类 / 标签
+  showCategories = true
+  showTags = true
+  showPagination = true
+  showDraftLabel = true
+  showEdit = false              # 打开后文章会出现「编辑此页」
+  # editURL = "https://github.com/YOUR-USERNAME/YOUR-REPO/edit/main/"
+  seriesOpened = false
+  showZenMode = false           # 禅模式
+  showComments = false          # ★ 配好 Giscus 后再改成 true（见文件末尾）
+  showViews = false
+  showLikes = false
+
+# ---------- 列表页 ----------
+[list]
+  showSummary = true            # 列表里显示摘要
+  showCards = true              # 卡片式排布
+  cardView = false
+  groupByYear = true            # 按年份分组 —— 长期记录的归档感很好
+  showBreadcrumbs = false
+  showHero = false
+  showTableOfContents = false
+
+# ---------- 分类 / 标签页 ----------
+[taxonomy]
+  showTermCount = true          # 显示每个标签下有几篇
+
+[term]
+  showTableOfContents = true
+
+[sitemap]
+  excludedKinds = ["taxonomy", "term"]
+
+# ---------- 评论：Giscus（基于 GitHub Discussions，免费、无后端、无广告）----------
+# 配置步骤（5 分钟）：
+#   1) 本博客仓库必须是 public，并在 Settings → General → Features 勾选「Discussions」
+#   2) 到 https://github.com/apps/giscus 安装 Giscus App，授权给该仓库
+#   3) 打开 https://giscus.app/zh-CN ，填入仓库名，选择 Discussion 分类，页面会生成参数
+#   4) 把下面四个值填进来，并把上面 [article] 的 showComments 改成 true
+[giscus]
+  repo = ""            # 形如 "用户名/仓库名"
+  repoId = ""
+  category = ""        # 分类名，如 "Announcements"
+  categoryId = ""
+  mapping = "pathname" # pathname / url / title / og:title
+  reactionsEnabled = "1"
+  inputPosition = "top"
+  lang = "zh-CN"
+
+# ---------- 统计 / 广告（默认全关，按需开启）----------
+[verification]
+  # google = ""
+  # bing = ""
+
+# [umamiAnalytics]
+#   websiteid = ""
+
+# [fathomAnalytics]
+#   # site = ""

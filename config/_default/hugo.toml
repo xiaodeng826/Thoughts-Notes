@@ -1,0 +1,61 @@
+# ============================================================
+#  站点核心配置  ·  hugo.toml
+#  改完记得重新构建：.\.tools\hugo.exe server -D
+# ============================================================
+
+# ★★★ 第 1 步：把下面这行改成你自己的地址 ★★★
+#   项目站（仓库名不是 用户名.github.io 时）：https://用户名.github.io/仓库名/
+#   用户站（仓库名正好是 用户名.github.io）：https://用户名.github.io/
+baseURL = "https://YOUR-USERNAME.github.io/YOUR-REPO/"
+
+theme = "blowfish"
+defaultContentLanguage = "zh-cn"
+
+# 中文内容必开：让 Hugo 按「字」而不是「空格」来统计与截断
+hasCJKLanguage = true
+summaryLength = 80
+
+enableRobotsTXT = true
+enableEmoji = true
+buildDrafts = false      # 本地预览时用 -D 参数临时显示草稿，不必改这里
+buildFuture = false
+
+# 每页文章数
+[pagination]
+  pagerSize = 10
+
+[imaging]
+  anchor = 'Center'
+
+# 分类法：文章 front matter 里写 tags / categories / series 即可
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+  author = "authors"
+  series = "series"
+
+[sitemap]
+  changefreq = 'weekly'
+  filename = 'sitemap.xml'
+  priority = 0.5
+
+# home 里的 "JSON" 是站内搜索（Fuse.js）的索引，别删
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+# 「相关文章」按权重综合计算
+[related]
+  threshold = 0
+  toLower = false
+    [[related.indices]]
+        name = "tags"
+        weight = 100
+    [[related.indices]]
+        name = "categories"
+        weight = 100
+    [[related.indices]]
+        name = "series"
+        weight = 50
+    [[related.indices]]
+        name = "date"
+        weight = 10

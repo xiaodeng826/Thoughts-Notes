@@ -1,0 +1,35 @@
+# ============================================================
+#  语言 / 站点标题 / 作者名片  ·  languages.zh-cn.toml
+#  ★★★ 第 2 步：把下面带「改我」的地方换成你自己的信息 ★★★
+#  首页 profile / hero 布局上的头像、名字、签名、社交图标都来自这里
+# ============================================================
+
+disabled = false
+locale = "zh-CN"
+label = "简体中文"
+weight = 1
+title = "我的博客"                 # 改我：浏览器标签页与站点标题
+
+[params]
+  displayName = "中"
+  isoCode = "zh-CN"
+  rtl = false
+  dateFormat = "2006年1月2日"       # Hugo 的时间格式，年=2006 月=1 日=2
+  description = "认真记录的地方。"   # 改我：SEO 描述
+  # copyright = "© 2026 你的名字"   # 取消注释可自定义页脚版权
+
+  # ---------- 作者名片（首页那张卡） ----------
+  [params.author]
+    name = "你的名字"                       # 改我
+    image = "img/avatar.png"               # 改我：换成自己的照片，放到 assets/img/ 下（主题会自动裁剪压缩）
+    imageQuality = 96
+    headline = "记录、思考、慢慢写"          # 改我：一句话签名，支持 Markdown
+    bio = "这里放一段自我介绍。"             # 改我：用于 SEO 与部分布局
+    # 社交图标：图标名必须是主题 assets/icons/ 里存在的文件名
+    # 完整可选名见：themes/blowfish/assets/icons/
+    links = [
+      { github = "https://github.com/YOUR-USERNAME" },   # 改我：换成你的，或整行删掉
+      # { email = "mailto:you@example.com" },
+      # { rss = "/index.xml" },          # 博客一般自带 RSS，建议保留
+    ]
+
