@@ -6,28 +6,34 @@
   weight = 10
 
 [[main]]
+  name = "LLM"
+  parent = "文章"
+  pageRef = "llm"
+  weight = 11
+
+[[main]]
   name = "随笔"
   parent = "文章"
   pageRef = "essay"
-  weight = 11
+  weight = 12
 
 [[main]]
   name = "技术笔记"
   parent = "文章"
   pageRef = "tech"
-  weight = 12
+  weight = 13
 
 [[main]]
   name = "读书笔记"
   parent = "文章"
   pageRef = "reading"
-  weight = 13
+  weight = 14
 
 [[main]]
   name = "生活"
   parent = "文章"
   pageRef = "life"
-  weight = 14
+  weight = 15
 
 [[main]]
   name = "标签"
