@@ -67,3 +67,13 @@ pre, code, kbd, samp {
 ::selection {
   background: rgb(139 92 246 / .22);
 }
+
+/* ---------- 7. 没有文章时，隐藏首页空的「最近的文章」区块 ----------
+   主题在 [homepage] showRecent = true 时会无条件渲染 <h2>最近的文章</h2>
+   和紧跟其后的空 <section>。文章全删掉后，会留下一个只有标题的空壳，
+   看起来像是"删了但没删干净"。这里用 :has() 判断后一个兄弟节点为空则隐藏。
+   浏览器不支持 :has() 时会自动退回原样，不影响功能。 */
+h2:has(+ section:empty),
+h2:has(+ section:empty) + section {
+  display: none;
+}
