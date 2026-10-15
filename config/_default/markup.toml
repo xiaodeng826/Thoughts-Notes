@@ -10,6 +10,9 @@
 
   [goldmark.renderer]
     unsafe = true
+    # 单个换行也渲染成 <br>。默认 Markdown 把"单个换行"当成空格，
+    # 中文写作时会呈现为整段连在一起。
+    hardWraps = true
 
   [goldmark.extensions]
     [goldmark.extensions.passthrough]

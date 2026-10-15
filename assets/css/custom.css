@@ -77,3 +77,12 @@ h2:has(+ section:empty),
 h2:has(+ section:empty) + section {
   display: none;
 }
+
+/* ---------- 8. 中文首行缩进 ----------
+   Markdown 会吃掉行首的空格（这是规范），所以靠打空格做缩进是没用的。
+   改成由排版自动处理：只对文章正文里的顶层段落生效，
+   列表、引用、代码块、表格都不受影响。
+   不想要缩进的话，把下面这一行删掉或注释即可。 */
+.article-content > p {
+  text-indent: 2em;
+}
