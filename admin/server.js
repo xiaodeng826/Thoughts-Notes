@@ -152,6 +152,26 @@ function readPost(file, section) {
   };
 }
 
+// 从 hugo.toml 读出站点正式地址，用于在后台直接打开线上页面
+function siteBaseURL() {
+  try {
+    const t = fs.readFileSync(path.join(ROOT, "config", "_default", "hugo.toml"), "utf8");
+    const m = /^\s*baseURL\s*=\s*"([^"]*)"/m.exec(t);
+    return m ? m[1].replace(/\/$/, "") : "";
+  } catch (e) { return ""; }
+}
+
+// 算出一篇文章的线上地址。Hugo 默认把网址转小写，这里必须跟着一起转。
+function postLiveURL(rel) {
+  const base = siteBaseURL();
+  if (!base) return "";
+  const parts = String(rel).split("/");
+  const file = parts.pop();
+  const slug = (file === "index.md" ? parts.pop() : file.replace(/\.md$/i, "")) || "";
+  const section = parts.length ? parts[parts.length - 1] : "";
+  return base + "/" + section.toLowerCase() + "/" + encodeURIComponent(slug.toLowerCase()) + "/";
+}
+
 function listSections() {
   if (!fs.existsSync(CONTENT)) return [];
   return fs.readdirSync(CONTENT, { withFileTypes: true })
@@ -528,12 +548,14 @@ const server = http.createServer(async function (req, res) {
           git: await gitInfo(),
           settings: maskedSettings(),
           root: ROOT,
+          baseURL: siteBaseURL(),
         });
       case "GET /api/post": {
         const abs = safeRel(q.get("path"));
         return json(res, 200, {
           path: q.get("path"),
           raw: fs.readFileSync(abs, "utf8"),
+          liveURL: postLiveURL(q.get("path")),
           post: readPost(abs, q.get("section") || ""),
         });
       }

@@ -178,6 +178,8 @@ async function openEditor(path, section) {
   STATE.editing = path;
   STATE.view = "edit";
   STATE.editingSection = section;
+  STATE.editingLiveURL = d.liveURL || "";
+  STATE.editingDraft = !!p.draft;
   renderTopbar();
 
   const secOpts = STATE.sections.map(function (s) {
@@ -186,6 +188,9 @@ async function openEditor(path, section) {
 
   $("#view").innerHTML =
     '<div class="editor">' +
+      '<div class="draft-banner" id="draftBanner" style="display:' + (p.draft ? "" : "none") + '">' +
+        '📝 这篇还是 <b>草稿</b>，<b>网站上不会出现</b>。要公开就取消下面「草稿（网站不显示）」的勾选，保存后点右上角「⬆️ 上传改动」。' +
+      "</div>" +
       '<div class="row">' +
         '<div class="field" style="flex:3"><label>标题</label><input id="fTitle" type="text" value="' + esc(p.title) + '"></div>' +
         '<div class="field" style="flex:.8"><label>板块</label><select id="fSection">' + secOpts + "</select></div>" +
@@ -262,6 +267,13 @@ function wireEditor() {
   };
   $("#btnSave").onclick = function () { saveEditor(false); };
   $("#btnSaveOpen").onclick = function () { saveEditor(true); };
+  const draftBox = $("#fDraft");
+  if (draftBox) {
+    draftBox.onchange = function () {
+      const b = $("#draftBanner");
+      if (b) b.style.display = this.checked ? "" : "none";
+    };
+  }
   $("#btnDelete").onclick = function () { delPost(); };
 
   /* ---- 图片上传：按钮 / 拖拽 / 粘贴 ---- */
@@ -472,7 +484,15 @@ function newSectionDialog() {
 /* ============ 一键发布到线上 ============ */
 async function doPublish() {
   if (STATE.git.changes === 0) { toast("没有需要发布的改动", "ok"); return; }
-  if (!confirm("把 " + STATE.git.changes + " 个文件的改动提交并推送到 GitHub？\n\n推送后线上会自动更新。")) return;
+  const drafts = STATE.posts.filter(function (p) { return p.draft; });
+  let msg = "把 " + STATE.git.changes + " 个文件的改动上传到 GitHub？\n\n上传后网站会自动更新。";
+  if (drafts.length) {
+    msg += "\n\n⚠️ 有 " + drafts.length + " 篇草稿不会出现在网站上：\n" +
+      drafts.slice(0, 5).map(function (p) { return "· " + p.title; }).join("\n") +
+      (drafts.length > 5 ? "\n…" : "") +
+      "\n\n想让某篇公开，打开它取消勾选「草稿」后再上传。";
+  }
+  if (!confirm(msg)) return;
   const btn = $("#btnPublish");
   btn.disabled = true;
   btn.textContent = "发布中…";
