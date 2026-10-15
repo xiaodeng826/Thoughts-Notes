@@ -10,7 +10,7 @@ showComments: false
 
 ## 关于我
 
-我是 **你的名字**（改我）。这里写两三句自我介绍。
+我是 **不知眠**。这里写两三句自我介绍。
 
 ## 关于这个博客
 
@@ -20,7 +20,7 @@ showComments: false
 
 ## 联系我
 
-- GitHub：[YOUR-USERNAME](https://github.com/YOUR-USERNAME)
-- 邮箱：you@example.com
+- GitHub：[xiaodeng826](https://github.com/xiaodeng826)
+- 邮箱：（还没填）
 
 > 本站由 [Hugo](https://gohugo.io/) + [Blowfish](https://blowfish.page/zh-cn/) 构建，托管在 GitHub Pages 上，文章源文件是普通的 Markdown。
