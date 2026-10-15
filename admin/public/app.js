@@ -80,8 +80,8 @@ async function refresh() {
   STATE.root = d.root;
   renderSidebar();
   renderTopbar();
+  // 编辑/设置视图下只刷新侧栏，不重绘主体（否则会把编辑器 DOM 冲掉）
   if (STATE.view === "list") renderList();
-  else if (STATE.view === "edit" && !STATE.editing) { STATE.view = "list"; renderList(); }
 }
 
 function renderSidebar() {
@@ -220,16 +220,22 @@ function slugOf(p) {
   return a[a.length - 1] === "index.md" ? a[a.length - 2] : a[a.length - 1].replace(/\.md$/, "");
 }
 function collectEditor() {
+  // 编辑器不在页面上时（已切到列表/设置页）返回 null，由调用方兜底。
+  // 否则读 null.value 会抛 "Cannot read properties of null (reading 'value')"
+  const el = function (id) { return document.getElementById(id); };
+  const t = el("fTitle"), d = el("fDate"), dr = el("fDraft"), pv = el("fPrivate");
+  const ds = el("fDesc"), tg = el("fTags"), ct = el("fCats"), bd = el("fBody");
+  if (!t || !d || !dr || !pv || !ds || !tg || !ct || !bd) return null;
   return {
     path: STATE.editing,
-    title: $("#fTitle").value.trim(),
-    date: $("#fDate").value,
-    draft: $("#fDraft").checked,
-    isPrivate: $("#fPrivate").checked,
-    description: $("#fDesc").value.trim(),
-    tags: commaList($("#fTags").value),
-    categories: commaList($("#fCats").value),
-    body: $("#fBody").value,
+    title: t.value.trim(),
+    date: d.value,
+    draft: dr.checked,
+    isPrivate: pv.checked,
+    description: ds.value.trim(),
+    tags: commaList(tg.value),
+    categories: commaList(ct.value),
+    body: bd.value,
   };
 }
 
@@ -278,29 +284,40 @@ function wireEditor() {
   });
   loadImages();
   document.onkeydown = function (e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
-      e.preventDefault();
-      saveEditor(false);
-    }
+    if (!(e.ctrlKey || e.metaKey) || !(e.key === "s" || e.key === "S")) return;
+    // 只有确实在编辑文章时才接管 Ctrl+S；否则放行给浏览器，避免在列表/设置页报错
+    if (STATE.view !== "edit" || !STATE.editing || !document.getElementById("fTitle")) return;
+    e.preventDefault();
+    saveEditor(false);
   };
 }
 
 async function saveEditor(openAfter) {
+  // 兜底：Ctrl+S 是全局绑定，可能在非编辑器页面被触发
+  if (STATE.view !== "edit" || !STATE.editing) { toast("当前没有打开的文章", "err"); return; }
   const data = collectEditor();
+  if (!data) { toast("编辑界面已失效，请重新打开这篇文章", "err"); return; }
   if (!data.title) { toast("标题不能为空", "err"); return; }
+
+  // 关键：先把板块名取出来。refresh() 之后如果视图被重绘，$("#fSection") 就没了
+  const keep = STATE.editing;
+  const sec = $("#fSection") ? $("#fSection").value : "";
+  const btn = $("#btnSave");
+  if (btn) btn.disabled = true;
   try {
     await api.post("/api/post", data);
     toast("已保存", "ok");
-    const keep = STATE.editing;
-    STATE.editing = null;
-    await refresh();
+    await refresh();   // 只刷新侧栏计数，不重绘编辑器，避免光标跳走
     if (openAfter) {
-      await ensurePreview();
-      window.open("http://localhost:1313/" + $("#fSection").value + "/" + slugOf(keep) + "/", "_blank");
-    } else {
-      openEditor(keep, $("#fSection").value);
+      if (await ensurePreview()) {
+        window.open("http://localhost:1313/" + sec + "/" + slugOf(keep) + "/", "_blank");
+      }
     }
-  } catch (e) { toast("保存失败：" + e.message, "err"); }
+  } catch (e) {
+    toast("保存失败：" + e.message, "err");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function delPost() {
@@ -310,6 +327,7 @@ async function delPost() {
     await api.post("/api/post/delete", { path: p });
     toast("已删除", "ok");
     STATE.editing = null;
+    STATE.view = "list";
     await refresh();
   } catch (e) { toast("删除失败：" + e.message, "err"); }
 }
