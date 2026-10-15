@@ -3,10 +3,10 @@
 #  改完记得重新构建：.\.tools\hugo.exe server -D
 # ============================================================
 
-# ★★★ 第 1 步：把下面这行改成你自己的地址 ★★★
+# 站点正式地址（线上部署时工作流会用真实地址覆盖它，这里主要影响本地构建）
 #   项目站（仓库名不是 用户名.github.io 时）：https://用户名.github.io/仓库名/
 #   用户站（仓库名正好是 用户名.github.io）：https://用户名.github.io/
-baseURL = "https://YOUR-USERNAME.github.io/YOUR-REPO/"
+baseURL = "https://xiaodeng826.github.io/Thoughts-Notes/"
 
 theme = "blowfish"
 defaultContentLanguage = "zh-cn"
