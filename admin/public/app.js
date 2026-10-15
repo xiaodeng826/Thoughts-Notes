@@ -47,10 +47,11 @@ function md(src) {
     blocks.push("<pre><code>" + code + "</code></pre>");
     return "\u0001" + (blocks.length - 1) + "\u0001";
   });
-  s = s.replace(/^#### (.*)$/gm, "<h4>$1</h4>")
-       .replace(/^### (.*)$/gm, "<h3>$1</h3>")
-       .replace(/^## (.*)$/gm, "<h2>$1</h2>")
-       .replace(/^# (.*)$/gm, "<h1>$1</h1>");
+  // 用 \s* 而不是空格，这样 ##标题（漏空格）在预览里也能正确显示标题样式
+  s = s.replace(/^####\s*(.*)$/gm, "<h4>$1</h4>")
+       .replace(/^###\s*(.*)$/gm, "<h3>$1</h3>")
+       .replace(/^##\s*(.*)$/gm, "<h2>$1</h2>")
+       .replace(/^#\s*(.*)$/gm, "<h1>$1</h1>");
   s = s.replace(/^&gt; ?(.*)$/gm, "<blockquote>$1</blockquote>");
   s = s.replace(/^\s*(?:---|\*\*\*)\s*$/gm, "<hr>");
   s = s.replace(/^\s*[-*] (.*)$/gm, "<li>$1</li>");
@@ -595,12 +596,28 @@ async function loadImages() {
     box.innerHTML = d.items.map(function (it) {
       return '<span class="img-chip" data-name="' + esc(it.name) + '" title="点击插入到正文">' +
         '<img src="/media?path=' + encodeURIComponent(it.rel) + '" alt="">' +
-        esc(it.name) + "</span>";
+        '<span class="nm">' + esc(it.name) + "</span>" +
+        '<b class="img-del" data-del="' + esc(it.rel) + '" title="删除这张图片">×</b></span>';
     }).join("");
     Array.prototype.forEach.call(box.querySelectorAll(".img-chip"), function (c) {
       c.onclick = function () {
         insertAtCursor($("#fBody"), "\n![](" + c.getAttribute("data-name") + ")\n");
         toast("已插入正文", "ok");
+      };
+    });
+    // 每张图右上角的 × ：从文章目录里删掉这张图片
+    Array.prototype.forEach.call(box.querySelectorAll(".img-del"), function (b) {
+      b.onclick = async function (ev) {
+        ev.stopPropagation();               // 别触发外面 chip 的"插入正文"
+        const rel = b.getAttribute("data-del");
+        if (!confirm("删除这张图片？\n\n" + rel + "\n\n注意：正文里对它的引用会失效，需要你自己删除那一行。")) return;
+        try {
+          await api.post("/api/image/delete", { path: rel });
+          toast("图片已删除", "ok");
+          await loadImages();
+        } catch (e) {
+          toast("删除失败：" + e.message, "err");
+        }
       };
     });
   } catch (e) {

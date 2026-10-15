@@ -209,6 +209,19 @@ function safeRel(rel) {
   return abs;
 }
 
+// Markdown 规定井号后必须有空格才算标题（##标题 只是普通文字）。
+// 中文写作不用空格，这个坑极易踩到，保存时自动补上。
+function normalizeHeadings(text) {
+  // 逐行处理，并且跳过围栏代码块内部：
+  // 否则 shell 脚本的 #!/bin/bash 会被改成 "# !/bin/bash" 而失效
+  let inFence = false;
+  return String(text || "").split(/\r?\n/).map(function (line) {
+    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; return line; }
+    if (inFence) return line;
+    return line.replace(/^(#{1,6})([^\s#])/, "$1 $2");
+  }).join("\n");
+}
+
 function savePost(input) {
   const rel = String(input.path || "");
   if (!rel) throw new Error("缺少文件路径");
@@ -229,7 +242,8 @@ function savePost(input) {
   setField(lines, "tags", "tags: " + yamlList(input.tags));
   setField(lines, "categories", "categories: " + yamlList(input.categories));
 
-  const body = String(input.body == null ? doc.body : input.body).replace(/^\s*\n+/, "").replace(/\s+$/, "") + "\n";
+  const body = normalizeHeadings(String(input.body == null ? doc.body : input.body))
+    .replace(/^\s*\n+/, "").replace(/\s+$/, "") + "\n";
   const out = "---\n" + lines.join("\n") + "\n---\n\n" + body;
   fs.mkdirSync(path.dirname(abs), { recursive: true });
   fs.writeFileSync(abs, out, "utf8");
