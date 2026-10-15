@@ -212,6 +212,46 @@ function safeRel(rel) {
 
 // Markdown 规定井号后必须有空格才算标题（##标题 只是普通文字）。
 // 中文写作不用空格，这个坑极易踩到，保存时自动补上。
+// 把"手打编号 + 空格缩进"的行规整成真正的 Markdown 有序列表：
+// 否则行首空格被吃掉、编号也不会有列表缩进。
+// 同时避免 4 个以上空格被解析成代码块。
+function normalizeLists(text) {
+  // 目标：把"手打编号 + 空格缩进"规整成真正的 Markdown 有序列表。
+  // 三件事：① 列表前补空行（否则不会被识别成列表）
+  //        ② 收敛行首缩进（4+ 空格会被当代码块，3 空格会被当上一项续行）
+  //        ③ 列表后补空行并去掉缩进（否则后续段落会被吸进最后一个列表项）
+  const lines = String(text || "").split(/\r?\n/);
+  const out = [];
+  let inFence = false;
+  let lastNonBlankWasList = false;   // 只被"非空行"改变，空行不重置
+  const isList = function (l) { return /^\s*(?:\d+\.|[-*+])\s*\S/.test(l); };
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; out.push(line); lastNonBlankWasList = false; continue; }
+    if (inFence) { out.push(line); continue; }
+    if (line.trim() === "") { out.push(line); continue; }
+
+    if (isList(line)) {
+      const prev = out.length ? out[out.length - 1] : "";
+      if (prev.trim() !== "" && !lastNonBlankWasList) out.push("");
+      line = line.replace(/^ {4,}/, "");
+      line = line.replace(/^(\s*)(\d{1,9}\.)(?=\S)/, "$1$2 ");
+      line = line.replace(/^(\s*)([-*+])\s+(?=\S)/, "$1$2 ");
+      out.push(line);
+      lastNonBlankWasList = true;
+    } else {
+      if (lastNonBlankWasList) {
+        const prev = out.length ? out[out.length - 1] : "";
+        if (prev.trim() !== "") out.push("");
+        line = line.replace(/^ {1,}/, "");
+      }
+      out.push(line);
+      lastNonBlankWasList = false;
+    }
+  }
+  return out.join("\n");
+}
+
 function normalizeHeadings(text) {
   // 逐行处理，并且跳过围栏代码块内部：
   // 否则 shell 脚本的 #!/bin/bash 会被改成 "# !/bin/bash" 而失效
@@ -243,8 +283,9 @@ function savePost(input) {
   setField(lines, "tags", "tags: " + yamlList(input.tags));
   setField(lines, "categories", "categories: " + yamlList(input.categories));
 
-  const body = normalizeHeadings(String(input.body == null ? doc.body : input.body))
-    .replace(/^\s*\n+/, "").replace(/\s+$/, "") + "\n";
+  const rawBody = String(input.body == null ? doc.body : input.body);
+  const cleaned = normalizeLists(normalizeHeadings(rawBody));
+  const body = cleaned.replace(/^\s*\n+/, "").replace(/\s+$/, "") + "\n";
   const out = "---\n" + lines.join("\n") + "\n---\n\n" + body;
   fs.mkdirSync(path.dirname(abs), { recursive: true });
   fs.writeFileSync(abs, out, "utf8");
