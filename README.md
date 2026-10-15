@@ -236,6 +236,11 @@ git push -u origin main
 仓库页面 → **Settings** → 左侧 **Pages** → **Build and deployment** → **Source** 选 **GitHub Actions**。
 
 > ⚠️ 一定要选 GitHub Actions。选成 "Deploy from a branch" 不会触发我们的构建流程。
+>
+> **这一步必须手动做，无法自动化。** 工作流里的 `enablement: true` 会尝试自动创建 Pages 站点，
+> 但 GitHub 的 `GITHUB_TOKEN` 没有「创建 Pages 站点」的权限（那需要仓库 admin），
+> 会报 `Resource not accessible by integration`，导致构建卡在「配置 Pages」这一步。
+> 手动开启一次之后，就再也不用碰这个设置页了。
 
 ### 4. 完成
 
