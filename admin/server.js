@@ -148,6 +148,7 @@ function readPost(file, section) {
     description: readScalar(lines, "description") || "",
     tags: readList(lines, "tags"),
     categories: readList(lines, "categories"),
+    lastmod: normDate(readScalar(lines, "lastmod")) || "",
     mtime: st.mtime.toISOString(),
   };
 }
@@ -302,6 +303,7 @@ function savePost(input) {
   if (input.description !== undefined) setField(lines, "description", "description: " + yamlStr(input.description));
   setField(lines, "tags", "tags: " + yamlList(input.tags));
   setField(lines, "categories", "categories: " + yamlList(input.categories));
+  setField(lines, "lastmod", "lastmod: " + today());   // 修改日期：列表卡片显示的就是它
 
   const rawBody = String(input.body == null ? doc.body : input.body);
   const cleaned = normalizeLists(normalizeHeadings(rawBody));
