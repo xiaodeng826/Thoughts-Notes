@@ -18,24 +18,6 @@
   weight = 12
 
 [[main]]
-  name = "技术笔记"
-  parent = "文章"
-  pageRef = "tech"
-  weight = 13
-
-[[main]]
-  name = "读书笔记"
-  parent = "文章"
-  pageRef = "reading"
-  weight = 14
-
-[[main]]
-  name = "生活"
-  parent = "文章"
-  pageRef = "life"
-  weight = 15
-
-[[main]]
   name = "标签"
   pageRef = "tags"
   weight = 30
