@@ -4,7 +4,7 @@ date: 2026-10-15
 draft: false
 description: "这篇文章不会深入LLM的算法和原理层面，只是先从框架上粗浅的认识一下LLM。(这也是https://www.youtube.com/watch?v=kPGTx4wcm_w的学习笔记)"
 tags: ["AI;LLM"]
-categories: []
+categories: ["AI;LLM"]
 ---
 
 ## 什么是LLM
