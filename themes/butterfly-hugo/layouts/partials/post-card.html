@@ -2,11 +2,6 @@
 {{- $i := .index | default 0 -}}
 {{- $cover := $p.Params.cover -}}
 {{- if $cover }}{{- $cover = partial "funcs/imgurl.html" $cover -}}{{- end -}}
-{{- if not $cover -}}
-  {{- with $p.Resources.ByType "image" -}}
-    {{- range first 1 . -}}{{- $cover = .RelPermalink -}}{{- end -}}
-  {{- end -}}
-{{- end -}}
 {{- $side := cond (eq (mod $i 2) 0) "left" "right" -}}
 <article class="recent-post-item">
   {{- if $cover }}
