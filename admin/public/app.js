@@ -292,6 +292,11 @@ function wireEditor() {
     liveBtn.title = STATE.editingLiveURL || "";
     liveBtn.onclick = function () {
       if (!STATE.editingLiveURL) { toast("没算出线上地址，请检查 hugo.toml 里的 baseURL", "err"); return; }
+      const dirty = (STATE.git && STATE.git.changes) ? STATE.git.changes : 0;
+      if (dirty > 0) {
+        toast("本地还有 " + dirty + " 个改动没上传，线上还是旧版本。请先点右上角「⬆️ 上传改动」，等 1 分钟后再看。", "err");
+        return;
+      }
       if ($("#fDraft") && $("#fDraft").checked) {
         toast("这篇还是草稿，线上还没有它。取消勾选「草稿」并上传后再看。", "err");
         return;
@@ -356,13 +361,20 @@ async function saveEditor(openAfter) {
       STATE.editing = res.path;
       STATE.editingSection = data.section || STATE.editingSection;
     }
+    if (res && res.liveURL) {
+      STATE.editingLiveURL = res.liveURL;
+      const liveBtn = document.getElementById("btnLive");
+      if (liveBtn) liveBtn.title = res.liveURL;
+    }
     toast(res && res.moved ? ("已保存，并移动到「" + sectionTitleOf(data.section) + "」") : "已保存", "ok");
     await refresh();   // 只刷新侧栏计数，不重绘编辑器，避免光标跳走
     if (openAfter) {
-      if (await ensurePreview()) {
+      const purl = await ensurePreview();
+      if (purl) {
         const finalPath = (res && res.path) ? res.path : keep;
         const finalSec = (data.section || sec || "");
-        window.open("http://localhost:1313/" + finalSec + "/" + slugOf(finalPath) + "/", "_blank");
+        const target = purl.replace(/\/+$/, "") + "/" + finalSec + "/" + encodeURIComponent(slugOf(finalPath)) + "/";
+        window.open(target, "_blank");
       }
     }
   } catch (e) {
@@ -396,9 +408,15 @@ async function togglePreview() {
   } catch (e) { toast("操作失败：" + e.message, "err"); }
 }
 async function ensurePreview() {
-  if (STATE.preview.running) return true;
-  try { STATE.preview = await api.post("/api/preview/start"); renderTopbar(); return true; }
-  catch (e) { toast("预览启动失败：" + e.message, "err"); return false; }
+  if (STATE.preview && STATE.preview.running && STATE.preview.url) return STATE.preview.url;
+  try {
+    STATE.preview = await api.post("/api/preview/start");
+    renderTopbar();
+    return (STATE.preview && STATE.preview.url) || "";
+  } catch (e) {
+    toast("预览启动失败：" + e.message, "err");
+    return "";
+  }
 }
 
 /* ============ 新建文章 ============ */

@@ -5,6 +5,7 @@
  */
 "use strict";
 const http = require("http");
+const net = require("net");
 const fs = require("fs");
 const path = require("path");
 const { execFile, spawn } = require("child_process");
@@ -346,9 +347,11 @@ function savePost(input) {
   fs.mkdirSync(path.dirname(finalAbs), { recursive: true });
   fs.writeFileSync(finalAbs, out, "utf8");
   syncGitignore();
+  const newRel = path.relative(ROOT, finalAbs).replace(/\\/g, "/");
   return {
-    path: path.relative(ROOT, finalAbs).replace(/\\/g, "/"),
+    path: newRel,
     moved: moved,
+    liveURL: postLiveURL(newRel),
   };
 }
 
@@ -464,21 +467,61 @@ function syncMenu() {
 }
 
 /* ============ 预览服务（Hugo）============ */
-const PREVIEW_URL = "http://localhost:1313/";
+const PREVIEW_PORT_START = Number(process.env.BLOG_PREVIEW_PORT || 1313);
+let previewPort = PREVIEW_PORT_START;
 let previewProc = null;
 
-function previewStatus() {
-  return { running: !!(previewProc && previewProc.exitCode === null), url: PREVIEW_URL };
+function previewUrlOf(port) { return "http://localhost:" + port + "/"; }
+
+function probeUrl(url, timeoutMs) {
+  return new Promise(function (resolve) {
+    const req = http.get(url, function (res) { res.resume(); resolve(true); });
+    req.on("error", function () { resolve(false); });
+    req.setTimeout(timeoutMs || 1200, function () { req.destroy(); resolve(false); });
+  });
 }
-function startPreview() {
+
+function isPortFree(port) {
+  return new Promise(function (resolve) {
+    const srv = net.createServer();
+    srv.once("error", function () { resolve(false); });
+    srv.once("listening", function () { srv.close(function () { resolve(true); }); });
+    srv.listen(port, "127.0.0.1");
+  });
+}
+
+async function pickFreePort(start) {
+  for (let p = start; p < start + 30; p += 1) {
+    if (await isPortFree(p)) return p;
+  }
+  throw new Error("1313 附近找不到空闲端口，无法启动本地预览");
+}
+
+function previewStatus() {
+  return {
+    running: !!(previewProc && previewProc.exitCode === null),
+    url: previewUrlOf(previewPort),
+    port: previewPort,
+  };
+}
+
+async function startPreview() {
   if (previewStatus().running) return previewStatus();
   if (!fs.existsSync(HUGO)) throw new Error("找不到 Hugo： " + HUGO + "（请把 hugo.exe 放进 .tools 目录）");
+  previewPort = await pickFreePort(PREVIEW_PORT_START);
+  const url = previewUrlOf(previewPort);
   previewProc = spawn(HUGO, [
     "server", "--source", ROOT, "--cacheDir", path.join(ROOT, ".hugo-cache"),
-    "--baseURL", PREVIEW_URL, "-D", "--port", "1313", "--bind", "127.0.0.1",
+    "--baseURL", url, "-D", "--navigateToChanged", "--port", String(previewPort), "--bind", "127.0.0.1",
   ], { cwd: ROOT, stdio: "ignore", windowsHide: true });
   previewProc.on("exit", function () { previewProc = null; });
-  return previewStatus();
+  // 等真正能访问再返回，避免"打开了却是旧页面/空白"
+  for (let i = 0; i < 40; i += 1) {
+    await new Promise(function (r) { setTimeout(r, 300); });
+    if (await probeUrl(url, 800)) return previewStatus();
+    if (!previewStatus().running) break;
+  }
+  throw new Error("本地预览启动失败（端口 " + previewPort + "），可能被别的程序占用，请重试");
 }
 function stopPreview() {
   if (previewProc) { try { previewProc.kill(); } catch (e) {} previewProc = null; }
@@ -603,7 +646,7 @@ const server = http.createServer(async function (req, res) {
       case "POST /api/post/delete": return json(res, 200, deletePost(body.path));
       case "POST /api/section": return json(res, 200, body.original ? updateSection(body) : createSection(body));
       case "POST /api/section/delete": return json(res, 200, deleteSection(body.name));
-      case "POST /api/preview/start": return json(res, 200, startPreview());
+      case "POST /api/preview/start": return json(res, 200, await startPreview());
       case "POST /api/preview/stop": return json(res, 200, stopPreview());
       case "GET /api/settings": return json(res, 200, maskedSettings());
       case "POST /api/settings": {
