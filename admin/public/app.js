@@ -198,8 +198,8 @@ async function openEditor(path, section) {
       "</div>" +
       '<div class="row"><div class="field"><label>描述（列表和搜索里的摘要）</label><input id="fDesc" type="text" value="' + esc(p.description) + '"></div></div>' +
       '<div class="row">' +
-        '<div class="field"><label>标签（英文逗号分隔）</label><input id="fTags" type="text" value="' + esc(p.tags.join(", ")) + '"></div>' +
-        '<div class="field"><label>分类（英文逗号分隔）</label><input id="fCats" type="text" value="' + esc(p.categories.join(", ")) + '"></div>' +
+        '<div class="field"><label>标签（逗号或分号分隔，自动拆成多个）</label><input id="fTags" type="text" value="' + esc(p.tags.join(", ")) + '"></div>' +
+        '<div class="field"><label>分类（= 板块，自动跟随）</label><input type="text" value="' + esc(sectionTitleOf(p.section)) + '" disabled></div>' +
         '<div class="field" style="flex:0 0 auto"><label>&nbsp;</label>' +
           '<div class="switch"><input id="fDraft" type="checkbox"' + (p.draft ? " checked" : "") + '><span>草稿（网站不显示）</span></div></div>' +
         '<div class="field" style="flex:0 0 auto"><label>&nbsp;</label>' +
@@ -228,7 +228,18 @@ async function openEditor(path, section) {
 }
 
 function commaList(v) {
-  return String(v || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  return String(v || "").split(/[,，;；、|]/).map(function (s) { return s.trim(); }).filter(Boolean);
+}
+/* 标签：逗号/分号/顿号都能分隔；去重 */
+function tagList(v) {
+  const out = [];
+  commaList(v).forEach(function (t) { if (out.indexOf(t) === -1) out.push(t); });
+  return out;
+}
+/* 板块 key -> 显示名（分类用） */
+function sectionTitleOf(name) {
+  const hit = (STATE.sections || []).filter(function (s) { return s.name === name; })[0];
+  return hit ? hit.title : (name || "");
 }
 function slugOf(p) {
   const a = String(p).split("/");
@@ -239,8 +250,8 @@ function collectEditor() {
   // 否则读 null.value 会抛 "Cannot read properties of null (reading 'value')"
   const el = function (id) { return document.getElementById(id); };
   const t = el("fTitle"), d = el("fDate"), dr = el("fDraft"), pv = el("fPrivate");
-  const ds = el("fDesc"), tg = el("fTags"), ct = el("fCats"), bd = el("fBody");
-  if (!t || !d || !dr || !pv || !ds || !tg || !ct || !bd) return null;
+  const ds = el("fDesc"), tg = el("fTags"), bd = el("fBody");
+  if (!t || !d || !dr || !pv || !ds || !tg || !bd) return null;
   return {
     path: STATE.editing,
     title: t.value.trim(),
@@ -248,8 +259,7 @@ function collectEditor() {
     draft: dr.checked,
     isPrivate: pv.checked,
     description: ds.value.trim(),
-    tags: commaList(tg.value),
-    categories: commaList(ct.value),
+    tags: tagList(tg.value),
     body: bd.value,
   };
 }

@@ -34,7 +34,6 @@ enableGitInfo = true
 # 分类法：文章 front matter 里写 tags / categories / series 即可
 [taxonomies]
   tag = "tags"
-  category = "categories"
   author = "authors"
   series = "series"
 

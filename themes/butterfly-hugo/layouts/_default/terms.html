@@ -1,16 +1,21 @@
+
 {{ define "header" }}
 {{- $b := site.Params.butterfly -}}
+{{- $title := cond (eq .Data.Plural "tags") "标签" (cond (eq .Data.Plural "categories") "分类" .Title) -}}
 <header class="not-home-page" id="page-header" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
   {{ partial "nav.html" . }}
-  <div id="page-site-info"><h1 id="site-title">{{ .Title }}</h1></div>
+  <div id="page-site-info">
+    <h1 id="site-title">{{ $title }}</h1>
+    <div id="site-subtitle">共 {{ len .Pages }} 个</div>
+  </div>
 </header>
 {{ end }}
 {{ define "main" }}
 <div id="archive">
-  <div class="article-sort-title">{{ .Title }} - {{ len .Data.Terms }}</div>
-  <div class="card-tag-cloud" style="padding:20px">
-    {{- range $name, $taxonomy := .Data.Terms }}
-    <a href="{{ $.RelPermalink }}{{ $name | urlize }}/" style="font-size:1.2em">{{ $name }}{{ with $taxonomy.Count }} ({{ . }}){{ end }}</a>
+  <div class="article-sort-title">{{ if eq .Data.Plural "tags" }}全部标签{{ else }}{{ .Title }}{{ end }} - {{ len .Pages }} 个</div>
+  <div class="tag-cloud-page">
+    {{- range .Pages }}
+    <a class="tag-cloud-item" href="{{ .RelPermalink }}">{{ .Data.Term | default .Title }}<span class="tag-count">{{ len .Pages }}</span></a>
     {{- end }}
   </div>
 </div>

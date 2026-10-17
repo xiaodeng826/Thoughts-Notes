@@ -9,7 +9,7 @@
     <div class="site-data text-center">
       <a href="{{ "archives/" | relURL }}"><div class="headline">文章</div><div class="length-num">{{ len (where site.RegularPages "Section" "!=" "") }}</div></a>
       <a href="{{ "tags/" | relURL }}"><div class="headline">标签</div><div class="length-num">{{ len site.Taxonomies.tags }}</div></a>
-      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Taxonomies.categories }}</div></a>
+      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Sections }}</div></a>
     </div>
     <div class="menus_items">
       <div class="menus_item">

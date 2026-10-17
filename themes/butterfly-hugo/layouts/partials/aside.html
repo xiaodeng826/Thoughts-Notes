@@ -8,7 +8,7 @@
     <div class="site-data">
       <a href="{{ "archives/" | relURL }}"><div class="headline">文章</div><div class="length-num">{{ len $posts }}</div></a>
       <a href="{{ "tags/" | relURL }}"><div class="headline">标签</div><div class="length-num">{{ len site.Taxonomies.tags }}</div></a>
-      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Taxonomies.categories }}</div></a>
+      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Sections }}</div></a>
     </div>
     {{- with $b.github }}
     <a id="card-info-btn" target="_blank" rel="noopener" href="{{ . }}"><i class="fab fa-github"></i><span>Follow Me</span></a>
@@ -33,7 +33,7 @@
         <div class="aside-list-item">
           <a class="thumbnail" href="{{ .RelPermalink }}" title="{{ .Title }}"><div class="cover-grad-{{ $g }}"></div></a>
           <div class="content">
-            <a class="title" href="{{ .RelPermalink }}" title="{{ .Title }}">{{ .Title }}</a>
+            <a class="title" href="{{ .RelPermalink }}" title="{{ .Title }}">{{ .Data.Term | default .Title }}</a>
             <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
           </div>
         </div>
@@ -41,26 +41,29 @@
       </div>
     </div>
 
-    {{- with site.Taxonomies.categories }}
+    {{- $sections := site.Sections }}
+    {{- with $sections }}
     <div class="card-widget card-categories">
       <div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div>
       <ul class="card-category-list">
-        {{- range $name, $taxonomy := site.Taxonomies.categories }}
-        <li class="card-category-list-item"><a class="card-category-list-link" href="{{ printf "categories/%s/" ($name | urlize) | relURL }}"><span class="card-category-list-name">{{ $name }}</span><span class="card-category-list-count">{{ len $taxonomy }}</span></a></li>
+        {{- range . }}
+        <li class="card-category-list-item"><a class="card-category-list-link" href="{{ .RelPermalink }}"><span class="card-category-list-name">{{ .Title }}</span><span class="card-category-list-count">{{ len .RegularPages }}</span></a></li>
         {{- end }}
       </ul>
     </div>
     {{- end }}
 
-    {{- with site.Taxonomies.tags }}
+    {{- with site.GetPage "/tags" }}
+    {{- with .Pages }}
     <div class="card-widget card-tags">
       <div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div>
       <div class="card-tag-cloud">
-        {{- range $name, $taxonomy := site.Taxonomies.tags }}
-        <a href="/tags/{{ $name | urlize }}/">{{ $name }}</a>
+        {{- range . }}
+        <a href="{{ .RelPermalink }}">{{ .Data.Term | default .Title }}</a>
         {{- end }}
       </div>
     </div>
+    {{- end }}
     {{- end }}
   </div>
 </div>

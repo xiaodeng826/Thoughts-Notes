@@ -179,3 +179,35 @@
   max-height: 60vh;
   overflow: auto;
 }
+
+
+/* ---------- 9. 标签索引页 ---------- */
+.tag-cloud-page {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  padding: 6px 2px 20px;
+}
+.tag-cloud-item {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px; border-radius: 999px;
+  background: rgba(73,177,245,.12); color: var(--btn-bg);
+  font-size: 13.5px; line-height: 1.5;
+  transition: all .18s ease;
+}
+.tag-cloud-item:hover {
+  background: var(--btn-bg); color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(73,177,245,.32);
+}
+.tag-cloud-item .tag-count {
+  font-size: 11px; padding: 0 6px; border-radius: 999px;
+  background: rgba(0,0,0,.08); color: inherit; opacity: .8;
+}
+[data-theme="dark"] .tag-cloud-item { background: rgba(73,177,245,.2); }
+[data-theme="dark"] .tag-cloud-item .tag-count { background: rgba(255,255,255,.14); }
+
+/* 分类页的分组标题 */
+.article-sort-item.year .cat-count {
+  margin-left: 8px; font-size: 12.5px; color: var(--card-meta); font-weight: 400;
+}
+.article-sort-item.year a { color: inherit; }
+.article-sort-item.year a:hover { color: var(--btn-bg); }

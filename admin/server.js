@@ -104,6 +104,18 @@ function readList(lines, key) {
   return out;
 }
 
+/* 标签统一拆分：支持 , ， ; ； 、 | 作为分隔符 */
+function splitTags(list) {
+  const out = [];
+  (list || []).forEach(function (v) {
+    String(v).split(/[,，;；、|]/).forEach(function (s) {
+      s = s.trim();
+      if (s && out.indexOf(s) === -1) out.push(s);
+    });
+  });
+  return out;
+}
+
 function setField(lines, key, text) {
   const span = fieldSpan(lines, key);
   if (span) lines.splice(span.start, span.end - span.start + 1, text);
@@ -146,7 +158,7 @@ function readPost(file, section) {
     draft: String(readScalar(lines, "draft")).toLowerCase() === "true",
     isPrivate: String(readScalar(lines, "private")).toLowerCase() === "true",
     description: readScalar(lines, "description") || "",
-    tags: readList(lines, "tags"),
+    tags: splitTags(readList(lines, "tags")),
     categories: readList(lines, "categories"),
     lastmod: normDate(readScalar(lines, "lastmod")) || "",
     mtime: st.mtime.toISOString(),
@@ -301,8 +313,8 @@ function savePost(input) {
   if (input.isPrivate) setField(lines, "private", "private: true");
   else removeField(lines, "private");
   if (input.description !== undefined) setField(lines, "description", "description: " + yamlStr(input.description));
-  setField(lines, "tags", "tags: " + yamlList(input.tags));
-  setField(lines, "categories", "categories: " + yamlList(input.categories));
+  setField(lines, "tags", "tags: " + yamlList(splitTags(input.tags)));
+  removeField(lines, "categories");   // 分类 = 板块，不再写进 front matter
   setField(lines, "lastmod", "lastmod: " + today());   // 修改日期：列表卡片显示的就是它
 
   const rawBody = String(input.body == null ? doc.body : input.body);

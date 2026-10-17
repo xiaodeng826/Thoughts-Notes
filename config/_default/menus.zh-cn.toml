@@ -31,3 +31,8 @@
   name = "RSS"
   url = "/index.xml"
   weight = 20
+
+[[main]]
+  name = "分类"
+  pageRef = "categories"
+  weight = 25

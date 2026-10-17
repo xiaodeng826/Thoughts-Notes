@@ -3,8 +3,7 @@ title: "2.1-Working with Text Data"
 date: 2026-10-16
 draft: false
 description: "由于LLM不能直接处理自然语言文本，所以这一小结主要讲原始数据怎么转化成LLM可以利用的数据形式。"
-tags: ["LLM;token"]
-categories: []
+tags: ["LLM", "token"]
 ---
 
 ## Understanding word embeddings-初识词嵌入

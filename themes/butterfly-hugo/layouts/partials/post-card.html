@@ -32,10 +32,16 @@
         <time datetime="{{ $p.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}" title="更新于 {{ $p.Lastmod.Format "2006-01-02 15:04:05" }}">{{ $p.Lastmod.Format "2006-01-02" }}</time>
         {{- end }}
       </span>
-      {{- with $p.Params.tags }}
+      {{- with $p.CurrentSection }}
+      <span class="article-meta">
+        <span class="article-meta-separator">|</span>
+        <i class="fas fa-inbox"></i><a class="article-meta__categories" href="{{ .RelPermalink }}">{{ .Title }}</a>
+      </span>
+      {{- end }}
+      {{- with $p.GetTerms "tags" }}
       <span class="article-meta tags">
         <span class="article-meta-separator">|</span>
-        {{- range $k, $t := . }}{{ if $k }}<span class="article-meta-link">•</span>{{ end }}<i class="fas fa-tag"></i><a class="article-meta__tags" href="{{ printf "tags/%s/" ($t | urlize) | relURL }}">{{ $t }}</a>{{ end }}
+        {{- range $k, $t := . }}{{ if $k }}<span class="article-meta-link">•</span>{{ end }}<i class="fas fa-tag"></i><a class="article-meta__tags" href="{{ $t.RelPermalink }}">{{ $t.Data.Term | default $t.Title }}</a>{{ end }}
       </span>
       {{- end }}
     </div>

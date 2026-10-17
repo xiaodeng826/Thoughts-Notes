@@ -23,6 +23,8 @@
         <span class="post-meta-separator">|</span>
         <span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span>
         <span class="post-meta-separator">|</span>
+        <span class="post-meta-category"><i class="fas fa-inbox fa-fw post-meta-icon"></i><span class="post-meta-label">分类:</span><a href="{{ with .CurrentSection }}{{ .RelPermalink }}{{ end }}">{{ with .CurrentSection }}{{ .Title }}{{ end }}</a></span>
+        <span class="post-meta-separator">|</span>
         <span class="post-meta-wordcount"><i class="fas fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数:</span><span>{{ .WordCount }}</span></span>
       </div>
     </div>
@@ -51,10 +53,10 @@
     </div>
   </div>
 
-  {{- with .Params.tags }}
+  {{- with .GetTerms "tags" }}
   <div class="tag_share">
     <div class="post-meta__tag-list">
-      {{- range . }}<a class="post-meta__tags" href="{{ printf "tags/%s/" (. | urlize) | relURL }}">{{ . }}</a>{{ end }}
+      {{- range . }}<a class="post-meta__tags" href="{{ .RelPermalink }}">{{ .Data.Term | default .Title }}</a>{{ end }}
     </div>
   </div>
   {{- end }}
