@@ -1,0 +1,13 @@
+{{- $dest := .Destination -}}
+{{- $alt := .PlainText -}}
+{{- $src := $dest -}}
+{{- $clean := $dest -}}
+{{- if strings.Contains $clean "?" -}}{{- $clean = index (split $clean "?") 0 -}}{{- end -}}
+{{- with .Page.Resources.GetMatch $dest -}}
+  {{- $src = .RelPermalink -}}
+{{- end -}}
+{{- $name := path.BaseName $clean -}}
+<figure class="article-figure">
+  <img src="{{ $src | safeURL }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  <figcaption>{{ $name }}</figcaption>
+</figure>

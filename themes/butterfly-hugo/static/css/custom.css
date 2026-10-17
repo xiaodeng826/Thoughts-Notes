@@ -253,11 +253,42 @@
 
 
 /* ---------- 11. 目录里超长标题截断，避免撑破侧栏 ---------- */
-#card-toc .toc-content .toc-text {
-  display: inline-block;
-  max-width: 100%;
+#aside-content #card-toc .toc-content .toc-link {
+  display: flex !important;
+  align-items: baseline;
+  gap: 4px;
+}
+#aside-content #card-toc .toc-content .toc-number {
+  flex: 0 0 auto;
+}
+#aside-content #card-toc .toc-content .toc-text {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: bottom;
+}
+
+
+/* ---------- 12. 正文图片：图名 = 文件名（不含扩展名） ---------- */
+#article-container figure.article-figure {
+  margin: 1.4rem 0 1.6rem;
+  text-align: center;
+}
+#article-container figure.article-figure img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  border-radius: 8px;
+}
+#article-container figure.article-figure figcaption {
+  margin-top: .55rem;
+  font-size: .85em;
+  line-height: 1.6;
+  color: var(--card-meta, #858585);
+  letter-spacing: .02em;
+}
+/* 图片段落不要再套首行缩进 */
+#article-container > p:has(> figure.article-figure) {
+  text-indent: 0;
 }

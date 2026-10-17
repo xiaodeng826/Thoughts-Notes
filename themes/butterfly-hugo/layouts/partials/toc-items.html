@@ -1,6 +1,6 @@
 {{- $prefix := .prefix | default "" -}}
 {{- range $i, $h := .heads }}
-  {{- if or (eq $h.Level 0) (not $h.ID) }}
+  {{- if or (eq $h.Level 0) (not $h.ID) (not $h.Title) }}
     {{- with $h.Headings }}{{ partial "toc-items.html" (dict "heads" . "prefix" $prefix) }}{{ end }}
   {{- else }}
   {{- $num := printf "%s%d" $prefix (add $i 1) }}
