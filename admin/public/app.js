@@ -250,10 +250,11 @@ function collectEditor() {
   // 否则读 null.value 会抛 "Cannot read properties of null (reading 'value')"
   const el = function (id) { return document.getElementById(id); };
   const t = el("fTitle"), d = el("fDate"), dr = el("fDraft"), pv = el("fPrivate");
-  const ds = el("fDesc"), tg = el("fTags"), bd = el("fBody");
+  const ds = el("fDesc"), tg = el("fTags"), bd = el("fBody"), secSel = el("fSection");
   if (!t || !d || !dr || !pv || !ds || !tg || !bd) return null;
   return {
     path: STATE.editing,
+    section: secSel ? secSel.value : "",
     title: t.value.trim(),
     date: d.value,
     draft: dr.checked,
@@ -349,12 +350,19 @@ async function saveEditor(openAfter) {
   const btn = $("#btnSave");
   if (btn) btn.disabled = true;
   try {
-    await api.post("/api/post", data);
-    toast("已保存", "ok");
+    const res = await api.post("/api/post", data);
+    // 板块变了的话，文件已经搬到新目录，后续保存/删除要跟着换路径
+    if (res && res.path) {
+      STATE.editing = res.path;
+      STATE.editingSection = data.section || STATE.editingSection;
+    }
+    toast(res && res.moved ? ("已保存，并移动到「" + sectionTitleOf(data.section) + "」") : "已保存", "ok");
     await refresh();   // 只刷新侧栏计数，不重绘编辑器，避免光标跳走
     if (openAfter) {
       if (await ensurePreview()) {
-        window.open("http://localhost:1313/" + sec + "/" + slugOf(keep) + "/", "_blank");
+        const finalPath = (res && res.path) ? res.path : keep;
+        const finalSec = (data.section || sec || "");
+        window.open("http://localhost:1313/" + finalSec + "/" + slugOf(finalPath) + "/", "_blank");
       }
     }
   } catch (e) {

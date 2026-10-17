@@ -12,10 +12,16 @@
   weight = 11
 
 [[main]]
+  name = "CTF-pwn"
+  parent = "文章"
+  pageRef = "pwn"
+  weight = 12
+
+[[main]]
   name = "随笔"
   parent = "文章"
   pageRef = "essay"
-  weight = 12
+  weight = 13
 
 [[main]]
   name = "标签"
@@ -31,8 +37,3 @@
   name = "RSS"
   url = "/index.xml"
   weight = 20
-
-[[main]]
-  name = "分类"
-  pageRef = "categories"
-  weight = 25

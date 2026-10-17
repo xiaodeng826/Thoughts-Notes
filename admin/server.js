@@ -321,10 +321,35 @@ function savePost(input) {
   const cleaned = normalizeLists(normalizeHeadings(rawBody));
   const body = cleaned.replace(/^\s*\n+/, "").replace(/\s+$/, "") + "\n";
   const out = "---\n" + lines.join("\n") + "\n---\n\n" + body;
-  fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, out, "utf8");
+
+  // ---- 板块（= 分类）变更：整篇文章目录一起搬家，正文里的图片等资源跟着走 ----
+  let finalAbs = abs;
+  let moved = false;
+  const relNorm = String(rel).replace(/\\/g, "/");
+  const mm = /^content\/([^/]+)\/(.+)\/index\.md$/.exec(relNorm);
+  const wantSection = String(input.section || "").trim();
+  if (mm && wantSection && wantSection !== mm[1]) {
+    if (!/^[A-Za-z0-9_-]+$/.test(wantSection)) throw new Error("板块名只能用字母、数字、- 和 _");
+    const dirName = mm[2].split("/").pop();
+    let targetDir = path.join(CONTENT, wantSection, dirName);
+    let n = 2;
+    while (fs.existsSync(path.join(targetDir, "index.md"))) {
+      targetDir = path.join(CONTENT, wantSection, dirName + "-" + n);
+      n += 1;
+    }
+    fs.mkdirSync(path.dirname(targetDir), { recursive: true });
+    fs.renameSync(path.dirname(abs), targetDir);
+    finalAbs = path.join(targetDir, "index.md");
+    moved = true;
+  }
+
+  fs.mkdirSync(path.dirname(finalAbs), { recursive: true });
+  fs.writeFileSync(finalAbs, out, "utf8");
   syncGitignore();
-  return { path: path.relative(ROOT, abs).replace(/\\/g, "/") };
+  return {
+    path: path.relative(ROOT, finalAbs).replace(/\\/g, "/"),
+    moved: moved,
+  };
 }
 
 function createPost(input) {
