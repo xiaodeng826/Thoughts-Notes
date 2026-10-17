@@ -251,61 +251,72 @@ function safeRel(rel) {
 // 同时避免 4 个以上空格被解析成代码块。
 function normalizeLists(text) {
   // 把"手打编号 + 缩进"规整成真正的 Markdown 有序列表。
-  // 支持：1 xxx / 1、xxx / 1. xxx（中文写作里数字后常常不加点）
-  // 只有形成 1,2,3… 递增序列时才转换，避免把 "2026 年" 这类正文误判成列表。
+  // 支持：1 xxx / 1、xxx / 1. xxx；序号从 1 开始、承接上一个序号、或明确缩进过都认。
+  // 另外：列表项之间的图片和缩进续行会自动归属到上一个列表项，避免列表被打断。
   const lines = String(text || "").split(/\r?\n/);
   const out = [];
   let inFence = false;
-  let lastNonBlankWasList = false;
-  let seqNext = 0;
+  let listOpen = false;     // 当前是否处在一个列表块里
+  let lastListNum = 0;      // 上一个列表项的编号
   const isMdList = function (l) { return /^\s*(?:\d+\.|[-*+])\s+\S/.test(l); };
+  const isImageOnly = function (l) { return /^\s*!\[[^\]]*\]\([^)]+\)\s*$/.test(l); };
   const manualNum = function (l) {
     const m = /^(\s*)(\d{1,2})(?:\s*[.、]\s*(?!\d)|\s+)(\S.*)$/.exec(l);
-    return m ? { num: Number(m[2]), rest: m[3].trim() } : null;
+    return m ? { num: Number(m[2]), rest: m[3].trim(), indent: m[1].length } : null;
+  };
+  const numOf = function (l) {
+    const m = /^\s*(\d{1,9})\./.exec(l);
+    return m ? Number(m[1]) : 0;
   };
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
-    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; out.push(line); lastNonBlankWasList = false; seqNext = 0; continue; }
+    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; out.push(line); listOpen = false; continue; }
     if (inFence) { out.push(line); continue; }
     if (line.trim() === "") { out.push(line); continue; }
 
+    // 标题：结束当前列表
+    if (/^#{1,6}\s/.test(line)) {
+      out.push(line); listOpen = false; lastListNum = 0; continue;
+    }
+
+    // 1) 已经是标准 Markdown 列表
     if (isMdList(line)) {
-      const prev = out.length ? out[out.length - 1] : "";
-      if (prev.trim() !== "" && !lastNonBlankWasList) out.push("");
+      if (!listOpen) { const prev = out.length ? out[out.length - 1] : ""; if (prev.trim() !== "") out.push(""); }
       line = line.replace(/^ {4,}/, "");
       line = line.replace(/^(\s*)(\d{1,9}\.)(?=\S)/, "$1$2 ");
       line = line.replace(/^(\s*)([-*+])\s+(?=\S)/, "$1$2 ");
       out.push(line);
-      lastNonBlankWasList = true;
-      seqNext = 0;
+      listOpen = true;
+      const n0 = numOf(line);
+      if (n0) lastListNum = n0;
       continue;
     }
 
+    // 2) 手打编号
     const mn = manualNum(line);
-    if (mn && (mn.num === 1 || (seqNext && mn.num === seqNext))) {
-      const prev = out.length ? out[out.length - 1] : "";
-      if (prev.trim() !== "" && !lastNonBlankWasList) out.push("");
+    const indented = /^\s{2,}/.test(line);
+    if (mn && (mn.num === 1 || mn.num === lastListNum + 1 || indented)) {
+      if (!listOpen) { const prev = out.length ? out[out.length - 1] : ""; if (prev.trim() !== "") out.push(""); }
       out.push(mn.num + ". " + mn.rest);
-      lastNonBlankWasList = true;
-      seqNext = mn.num + 1;
+      listOpen = true;
+      lastListNum = mn.num;
       continue;
     }
 
-    // 列表项的续行：缩进 ≥2 空格时保留为该项的第二行
-    if (lastNonBlankWasList && /^\s{2,}\S/.test(line)) {
-      out.push("  " + line.trim());
+    // 3) 列表里的图片 / 缩进续行：归属上一个列表项（缩进 3 空格）
+    if (listOpen && (isImageOnly(line) || indented)) {
+      out.push("   " + line.trim());
       continue;
     }
 
-    if (lastNonBlankWasList) {
+    // 4) 普通段落：结束列表
+    if (listOpen) {
       const prev = out.length ? out[out.length - 1] : "";
       if (prev.trim() !== "") out.push("");
-      line = line.replace(/^ {1,}/, "");
     }
-    out.push(line);
-    lastNonBlankWasList = false;
-    seqNext = 0;
+    out.push(line.replace(/^ {1,}/, ""));
+    listOpen = false;
   }
   return out.join("\n");
 }
