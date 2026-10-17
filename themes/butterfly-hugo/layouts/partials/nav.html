@@ -1,0 +1,34 @@
+{{- $b := site.Params.butterfly -}}
+{{- $icons := dict "文章" "fas fa-book" "LLM" "fas fa-brain" "随笔" "fas fa-pen-nib" "标签" "fas fa-tags" "分类" "fas fa-folder-open" "关于" "fas fa-user" "归档" "fas fa-archive" "首页" "fas fa-home" -}}
+<nav id="nav">
+  <span id="blog-info">
+    <a class="nav-site-title" href="{{ site.Home.RelPermalink }}">
+      {{- with $b.logo }}<img class="site-icon" src="{{ . }}" alt="Logo">{{ end }}
+      <span class="site-name">{{ $b.siteName | default site.Title }}</span>
+    </a>
+  </span>
+  <div id="menus">
+    <div class="menus_items">
+      <div class="menus_item">
+        <a class="site-page" href="{{ site.Home.RelPermalink }}"><i class="fa-fw fas fa-home"></i><span> 首页</span></a>
+      </div>
+      {{ range site.Menus.main.ByWeight }}
+        {{ if .Children }}
+          <div class="menus_item">
+            <span class="site-page group"><i class="fa-fw {{ index $icons .Name | default "fas fa-link" }}"></i><span> {{ .Name }}</span><i class="fas fa-chevron-down"></i></span>
+            <ul class="menus_item_child">
+              {{ range .Children }}
+                <li><a class="site-page child" href="{{ .URL }}"><i class="fa-fw {{ index $icons .Name | default "fas fa-angle-right" }}"></i><span> {{ .Name }}</span></a></li>
+              {{ end }}
+            </ul>
+          </div>
+        {{ else }}
+          <div class="menus_item">
+            <a class="site-page" href="{{ .URL }}"><i class="fa-fw {{ index $icons .Name | default "fas fa-link" }}"></i><span> {{ .Name }}</span></a>
+          </div>
+        {{ end }}
+      {{ end }}
+    </div>
+    <div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div>
+  </div>
+</nav>

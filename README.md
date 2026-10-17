@@ -5,6 +5,35 @@
 
 ---
 
+## 主题：蝴蝶风格复刻（themes/butterfly-hugo）
+
+2026-10 改版：视觉与交互对齐 Butterfly（Hexo）主题，但**底层仍是 Hugo**，内容、后台、网址、部署方式都没变。
+
+**结构**
+
+- `themes/butterfly-hugo/layouts/` —— 本站自己写的 Hugo 模板（首页 / 文章 / 归档 / 标签 / 404）
+- `themes/butterfly-hugo/static/css/index.css`、`static/js/main.js`、`static/js/utils.js` —— Butterfly 内核（Apache-2.0，见同目录 THIRD-PARTY-NOTICES.md）
+- `themes/butterfly-hugo/static/css/custom.css` —— 自己的补充样式（渐变封面、正文缩进等）
+
+**常改的东西都在 `config/_default/params.toml` 的 `[butterfly]` 段**
+
+| 想改什么 | 改哪里 |
+| --- | --- |
+| 站名 / 副标题 / 作者 / 描述 | `siteName`、`subtitle`、`author`、`description` |
+| 头像、全屏背景图 | `themes/butterfly-hugo/static/img/avatar.png`、`background.jpg`（后台头像另有一份 `admin/public/img/avatar.png`） |
+| 公告卡片 | `announcement`、`showAnnouncement` |
+| GitHub 按钮 | `github` |
+| 访问量统计 / 粒子背景 / 鼠标烟花 / 无刷新跳转 | `busuanzi`、`canvasNest`、`fireworks`、`pjax`，设 false 即关 |
+
+**文章封面**：在 front matter 写 `cover: /img/xxx.jpg`；不写就用渐变色块（按标题长度自动分配 6 套配色）。
+
+**评论**：填 `[giscus]` 的四项（repo / repoId / category / categoryId，在 <https://giscus.app> 生成）后自动出现评论区，否则不显示。
+
+**想退回旧主题**：把 `config/_default/hugo.toml` 里 `theme = "butterfly-hugo"` 改回 `theme = "blowfish"` 即可，旧主题文件仍在。
+
+> ⚠️ 写模板时必须用 `relURL` 处理站内资源（如 `{{ "css/x.css" | relURL }}`），
+> 因为线上地址带 `/Thoughts-Notes/` 子路径，写死 `/css/x.css` 会 404。
+
 ## 图形化管理后台（推荐用这个写博客）
 
 双击 **`管理博客.bat`**，浏览器会自动打开 <http://localhost:1414/>。

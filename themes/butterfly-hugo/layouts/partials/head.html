@@ -1,0 +1,120 @@
+{{- $b := site.Params.butterfly -}}
+{{- $siteName := $b.siteName | default site.Title -}}
+{{- $desc := .Description | default site.Params.description | default $b.description -}}
+{{- $isPost := eq .Kind "page" -}}
+{{- $isHome := .IsHome -}}
+{{- $pageType := cond $isHome "home" (cond $isPost "post" "page") -}}
+{{- $hasToc := and $isPost (gt (len .Fragments.Headings) 0) -}}
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{{ if $isHome }}{{ $siteName }}{{ else }}{{ .Title }} | {{ $siteName }}{{ end }}</title>
+  <meta name="author" content="{{ $b.author | default $siteName }}">
+  <meta name="copyright" content="{{ $b.author | default $siteName }}">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="{{ $desc }}">
+  <meta property="og:type" content="{{ cond $isPost "article" "website" }}">
+  <meta property="og:title" content="{{ if $isHome }}{{ $siteName }}{{ else }}{{ .Title }}{{ end }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:site_name" content="{{ $siteName }}">
+  <meta property="og:description" content="{{ $desc }}">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:image" content="{{ partial "funcs/imgurl.html" $b.avatar | absURL }}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="{{ partial "funcs/imgurl.html" $b.avatar | absURL }}">
+  <link rel="shortcut icon" href="{{ "favicon.ico" | relURL }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  <link rel="preconnect" href="//cdn.jsdelivr.net">
+  <link rel="stylesheet" href="{{ "css/index.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "css/custom.css" | relURL }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css">
+  <script>
+  (() => {
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) { localStorage.removeItem(key); return undefined }
+        return value
+      }
+    }
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url; script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'; link.href = url; if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+    const activateDarkMode = () => {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      const m = document.querySelector('meta[name="theme-color"]')
+      if (m !== null) m.setAttribute('content', '#0d0d0d')
+    }
+    const activateLightMode = () => {
+      document.documentElement.setAttribute('data-theme', 'light')
+      const m = document.querySelector('meta[name="theme-color"]')
+      if (m !== null) m.setAttribute('content', '#ffffff')
+    }
+    btf.activateDarkMode = activateDarkMode
+    btf.activateLightMode = activateLightMode
+    const theme = saveToLocal.get('theme')
+    if (theme === 'dark') activateDarkMode()
+    else if (theme === 'light') activateLightMode()
+    const asideStatus = saveToLocal.get('aside-status')
+    if (asideStatus !== undefined) document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+  })()
+  </script>
+  <script>
+  var GLOBAL_CONFIG = {
+    root: '/',
+    highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":350,"highlightFullpage":false,"highlightMacStyle":false},
+    copy: { success: '复制成功', error: '复制失败', noSupport: '浏览器不支持' },
+    relativeDate: { homepage: false, post: false },
+    runtime: '',
+    dateSuffix: { just: '刚刚', min: '分钟前', hour: '小时前', day: '天前', month: '个月前' },
+    copyright: undefined,
+    lightbox: 'null',
+    Snackbar: undefined,
+    isPhotoFigcaption: false,
+    islazyloadPlugin: false,
+    isAnchor: false,
+    percent: { toc: true, rightside: false },
+    autoDarkmode: false
+  }
+  </script>
+  <script id="config-diff">var GLOBAL_CONFIG_SITE = {
+    title: {{ $siteName }},
+    isHighlightShrink: false,
+    isToc: {{ $hasToc }},
+    pageType: {{ $pageType }}
+  }</script>
+</head>

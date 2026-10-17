@@ -1,0 +1,3 @@
+{{- $u := . | default "" -}}
+{{- if hasPrefix $u "http" -}}{{- return $u -}}{{- end -}}
+{{- return (strings.TrimPrefix "/" $u | relURL) -}}

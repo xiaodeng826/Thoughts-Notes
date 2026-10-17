@@ -1,0 +1,89 @@
+{{ define "header" }}
+{{- $b := site.Params.butterfly -}}
+{{- $cover := partial "funcs/imgurl.html" (.Params.cover | default $b.background | default "img/background.jpg") -}}
+<header class="post-bg" id="page-header" style="background-image: url({{ $cover }})">
+  {{ partial "nav.html" . }}
+  <div id="post-info">
+    <h1 class="post-title">{{ .Title }}</h1>
+    <div id="post-meta">
+      <div class="meta-firstline">
+        <span class="post-meta-date">
+          <i class="far fa-calendar-alt fa-fw post-meta-icon"></i>
+          <span class="post-meta-label">发表于</span>
+          <time class="post-meta-date-created" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" title="发表于 {{ .Date.Format "2006-01-02 15:04:05" }}">{{ .Date.Format "2006-01-02" }}</time>
+          {{- if ne (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02") }}
+          <span class="post-meta-separator">|</span>
+          <i class="fas fa-history fa-fw post-meta-icon"></i>
+          <span class="post-meta-label">更新于</span>
+          <time class="post-meta-date-updated" datetime="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}" title="更新于 {{ .Lastmod.Format "2006-01-02 15:04:05" }}">{{ .Lastmod.Format "2006-01-02" }}</time>
+          {{- end }}
+        </span>
+      </div>
+      <div class="meta-secondline">
+        <span class="post-meta-separator">|</span>
+        <span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span>
+        <span class="post-meta-separator">|</span>
+        <span class="post-meta-wordcount"><i class="fas fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数:</span><span>{{ .WordCount }}</span></span>
+      </div>
+    </div>
+  </div>
+</header>
+{{ end }}
+{{ define "main" }}
+{{- $b := site.Params.butterfly -}}
+<div id="post">
+  <article class="container post-content" id="article-container">
+    {{ .Content }}
+  </article>
+
+  <div class="post-copyright">
+    <div class="post-copyright__author">
+      <span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span>
+      <span class="post-copyright-info"><a href="{{ site.Home.Permalink }}">{{ $b.author | default $b.siteName }}</a></span>
+    </div>
+    <div class="post-copyright__type">
+      <span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span>
+      <span class="post-copyright-info"><a href="{{ .Permalink }}">{{ .Permalink }}</a></span>
+    </div>
+    <div class="post-copyright__notice">
+      <span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span>
+      <span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="{{ site.Home.Permalink }}" target="_blank">{{ $b.siteName }}</a>！</span>
+    </div>
+  </div>
+
+  {{- with .Params.tags }}
+  <div class="tag_share">
+    <div class="post-meta__tag-list">
+      {{- range . }}<a class="post-meta__tags" href="{{ printf "tags/%s/" (. | urlize) | relURL }}">{{ . }}</a>{{ end }}
+    </div>
+  </div>
+  {{- end }}
+
+  {{- $prev := .PrevInSection -}}
+  {{- $next := .NextInSection -}}
+  {{- if or $prev $next }}
+  <nav class="pagination-post" id="pagination">
+    {{- with $prev }}
+    <a class="pagination-related{{ if not $next }} full-width{{ end }}" href="{{ .RelPermalink }}" title="{{ .Title }}">
+      {{- $g := add (mod (len .Title) 6) 1 }}
+      <div class="cover cover-grad-{{ $g }}"></div>
+      <div class="info">
+        <div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">{{ .Title }}</div></div>
+      </div>
+    </a>
+    {{- end }}
+    {{- with $next }}
+    <a class="pagination-related{{ if not $prev }} full-width{{ end }}" href="{{ .RelPermalink }}" title="{{ .Title }}">
+      {{- $g := add (mod (len .Title) 6) 1 }}
+      <div class="cover cover-grad-{{ $g }}"></div>
+      <div class="info text-right">
+        <div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">{{ .Title }}</div></div>
+      </div>
+    </a>
+    {{- end }}
+  </nav>
+  {{- end }}
+
+  {{ partial "comments.html" . }}
+</div>
+{{ end }}

@@ -1,0 +1,17 @@
+{{ define "header" }}
+{{- $b := site.Params.butterfly -}}
+<header class="not-home-page" id="page-header" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
+  {{ partial "nav.html" . }}
+  <div id="page-site-info"><h1 id="site-title">{{ .Title }}</h1></div>
+</header>
+{{ end }}
+{{ define "main" }}
+<div id="archive">
+  <div class="article-sort-title">{{ .Title }} - {{ len .Data.Terms }}</div>
+  <div class="card-tag-cloud" style="padding:20px">
+    {{- range $name, $taxonomy := .Data.Terms }}
+    <a href="{{ $.RelPermalink }}{{ $name | urlize }}/" style="font-size:1.2em">{{ $name }}{{ with $taxonomy.Count }} ({{ . }}){{ end }}</a>
+    {{- end }}
+  </div>
+</div>
+{{ end }}

@@ -5,11 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>博客管理台</title>
 <link rel="stylesheet" href="/style.css">
+<script>
+/* 深色模式与博客共用同一个 localStorage 键（btf 的格式：{value, expiry}） */
+(function () {
+  try {
+    var raw = localStorage.getItem('theme');
+    if (raw) {
+      var o = JSON.parse(raw);
+      var v = o && o.value;
+      if (v === 'dark' || v === 'light') document.documentElement.setAttribute('data-theme', v);
+    }
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <div id="app">
   <aside class="sidebar">
-    <div class="brand"><span>📝</span> 博客管理台</div>
+    <div class="brand">
+      <img class="brand-avatar" src="/img/avatar.png" alt="avatar">
+      <span class="brand-text"><b>不知眠的记录本</b><i>博客管理台</i></span>
+    </div>
 
     <div class="side-block">
       <div class="side-title">板块</div>
@@ -34,6 +50,7 @@
       <h1 id="viewTitle">全部文章</h1>
       <div class="topbar-right">
         <span id="gitBadge" class="badge">读取中…</span>
+        <button id="btnTheme" class="icon-btn" type="button" title="切换深色 / 浅色">🌙</button>
         <button id="btnPublish" class="btn primary" title="把本地改动推送到 GitHub，网站随后自动更新。文章是否公开由「草稿」开关决定。">⬆️ 上传改动</button>
       </div>
     </header>
@@ -43,6 +60,26 @@
 
 <div id="toast" class="toast"></div>
 <div id="modal" class="modal"><div class="modal-box" id="modalBox"></div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('btnTheme');
+  if (!btn) return
+  var sync = function () {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark'
+    btn.textContent = dark ? '☀️' : '🌙'
+  }
+  sync()
+  btn.addEventListener('click', function () {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark'
+    var next = dark ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', next)
+    try {
+      localStorage.setItem('theme', JSON.stringify({ value: next, expiry: Date.now() + 365 * 86400000 }))
+    } catch (e) {}
+    sync()
+  })
+})
+</script>
 <script src="/app.js"></script>
 </body>
 </html>

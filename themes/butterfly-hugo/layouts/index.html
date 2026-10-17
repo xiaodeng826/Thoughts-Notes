@@ -1,0 +1,23 @@
+{{ define "header" }}
+{{- $b := site.Params.butterfly -}}
+<header class="full_page" id="page-header" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
+  {{ partial "nav.html" . }}
+  <div id="site-info">
+    <h1 id="site-title">{{ $b.siteName | default site.Title }}</h1>
+    {{- with $b.subtitle }}<div id="site-subtitle">{{ . }}</div>{{ end }}
+  </div>
+  <div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div>
+</header>
+{{ end }}
+{{ define "main" }}
+{{- $posts := where site.RegularPages "Section" "!=" "" -}}
+<div id="recent-posts" class="recent-posts nc">
+  <div class="recent-post-items">
+    {{- $pag := .Paginate $posts.ByDate.Reverse }}
+    {{- range $i, $p := $pag.Pages }}
+      {{ partial "post-card.html" (dict "page" $p "index" $i) }}
+    {{- end }}
+  </div>
+  {{ partial "pagination.html" . }}
+</div>
+{{ end }}

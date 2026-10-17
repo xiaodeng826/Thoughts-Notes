@@ -8,7 +8,7 @@
 #   用户站（仓库名正好是 用户名.github.io）：https://用户名.github.io/
 baseURL = "https://xiaodeng826.github.io/Thoughts-Notes/"
 
-theme = "blowfish"
+theme = "butterfly-hugo"
 defaultContentLanguage = "zh-cn"
 
 # 中文内容必开：让 Hugo 按「字」而不是「空格」来统计与截断
@@ -45,7 +45,7 @@ enableGitInfo = true
 
 # home 里的 "JSON" 是站内搜索（Fuse.js）的索引，别删
 [outputs]
-  home = ["HTML", "RSS", "JSON"]
+  home = ["HTML", "RSS"]
 
 # 「相关文章」按权重综合计算
 [related]

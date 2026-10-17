@@ -1,0 +1,15 @@
+{{- $b := site.Params.butterfly -}}
+{{- $now := now.Format "2006" -}}
+{{- $since := $b.since | default $now -}}
+<footer id="footer" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
+  <div class="footer-other">
+    <div class="footer-copyright">
+      <span class="copyright">&copy;&nbsp;{{ if eq $since $now }}{{ $now }}{{ else }}{{ $since }} - {{ $now }}{{ end }} By {{ $b.author | default $b.siteName }}</span>
+      <span class="framework-info">
+        <span>框架 </span><a target="_blank" rel="noopener" href="https://gohugo.io">Hugo</a>
+        <span class="footer-separator">|</span>
+        <span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 风格复刻</a>
+      </span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,11 @@
+{{- $heads := .Fragments.Headings -}}
+{{- if $heads }}
+<div class="card-widget" id="card-toc">
+  <div class="item-headline">
+    <i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span>
+  </div>
+  <div class="toc-content is-expand">
+    <ol class="toc">{{ partial "toc-items.html" (dict "heads" $heads) }}</ol>
+  </div>
+</div>
+{{- end }}

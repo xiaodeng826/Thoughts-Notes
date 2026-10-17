@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale | default "zh-CN" }}"{{ if site.Params.butterfly.hideAsideByDefault }} class="hide-aside"{{ end }}>
+{{ partial "head.html" . }}
+<body>
+  <div id="web_bg" class="bg-animation" style="background-image: url({{ partial "funcs/imgurl.html" (site.Params.butterfly.background | default "img/background.jpg") }})"></div>
+  {{ partial "sidebar.html" . }}
+  <div class="page" id="body-wrap">
+    {{ block "header" . }}{{ end }}
+    <main class="layout" id="content-inner">
+      {{ block "main" . }}{{ end }}
+      {{ if ne .Kind "404" }}{{ partial "aside.html" . }}{{ end }}
+    </main>
+    {{ partial "footer.html" . }}
+  </div>
+  {{ partial "rightside.html" . }}
+  {{ partial "scripts.html" . }}
+</body>
+</html>

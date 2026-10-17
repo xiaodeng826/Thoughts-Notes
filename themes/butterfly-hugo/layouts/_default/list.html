@@ -1,0 +1,32 @@
+{{ define "header" }}
+{{- $b := site.Params.butterfly -}}
+<header class="not-home-page" id="page-header" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
+  {{ partial "nav.html" . }}
+  <div id="page-site-info">
+    <h1 id="site-title">{{ .Title }}</h1>
+    {{- with .Description }}<div id="site-subtitle">{{ . }}</div>{{ end }}
+  </div>
+</header>
+{{ end }}
+{{ define "main" }}
+{{- $posts := .Pages.ByDate.Reverse -}}
+{{- if .IsHome }}{{ $posts = where site.RegularPages "Section" "!=" "" }}{{ end -}}
+<div id="archive">
+  <div class="article-sort-title">{{ .Title }} - {{ len $posts }}</div>
+  {{- range $posts.GroupByDate "2006" }}
+  <div class="article-sort">
+    <div class="article-sort-item year">{{ .Key }}</div>
+    {{- range .Pages }}
+    {{- $g := add (mod (len .Title) 6) 1 }}
+    <div class="article-sort-item">
+      <a class="article-sort-item-img" href="{{ .RelPermalink }}" title="{{ .Title }}"><div class="cover-grad-{{ $g }}"></div></a>
+      <div class="article-sort-item-info">
+        <div class="article-sort-item-time"><i class="far fa-calendar-alt"></i><time class="post-meta-date-created" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time></div>
+        <a class="article-sort-item-title" href="{{ .RelPermalink }}" title="{{ .Title }}">{{ .Title }}</a>
+      </div>
+    </div>
+    {{- end }}
+  </div>
+  {{- end }}
+</div>
+{{ end }}

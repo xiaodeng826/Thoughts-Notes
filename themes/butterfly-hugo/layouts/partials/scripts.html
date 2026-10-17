@@ -1,0 +1,31 @@
+{{- $b := site.Params.butterfly -}}
+<div class="js-pjax"></div>
+{{- if $b.busuanzi }}
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+{{- end }}
+<script src="{{ "js/utils.js" | relURL }}"></script>
+<script src="{{ "js/main.js" | relURL }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module"></script>
+{{- if $b.fireworks }}
+<canvas class="fireworks" mobile="false"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/fireworks.min.js"></script>
+{{- end }}
+{{- if $b.canvasNest }}
+<script id="canvas_nest" defer color="73,177,245" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/dist/canvas-nest.min.js"></script>
+{{- end }}
+{{- if $b.pjax }}
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Pjax === 'undefined') return
+  const pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:description\"]","link[rel=\"canonical\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+  window.pjax = new Pjax({
+    elements: 'a:not([target=\"_blank\"]):not([href^=\"#\"]):not([href^=\"mailto:\"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+})
+</script>
+{{- end }}

@@ -1,0 +1,14 @@
+{{- $heads := .heads -}}
+{{- $prefix := .prefix | default "" -}}
+{{- $level := .level | default 2 -}}
+<ol class="toc">
+  {{- range $i, $h := $heads }}
+  {{- $num := printf "%s%d" $prefix (add $i 1) }}
+  <li class="toc-item toc-level-{{ $h.Level }}">
+    <a class="toc-link" href="#{{ $h.ID }}"><span class="toc-number">{{ $num }}.</span> <span class="toc-text">{{ $h.Title | plainify }}</span></a>
+    {{- with $h.Headings }}
+    {{ partial "toc-list.html" (dict "heads" . "prefix" (printf "%s." $num) "level" (add $level 1)) }}
+    {{- end }}
+  </li>
+  {{- end }}
+</ol>

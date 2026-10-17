@@ -1,0 +1,51 @@
+{{- $p := .page -}}
+{{- $i := .index | default 0 -}}
+{{- $cover := $p.Params.cover -}}
+{{- if $cover }}{{- $cover = partial "funcs/imgurl.html" $cover -}}{{- end -}}
+{{- if not $cover -}}
+  {{- with $p.Resources.ByType "image" -}}
+    {{- range first 1 . -}}{{- $cover = .RelPermalink -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $side := cond (eq (mod $i 2) 0) "left" "right" -}}
+<article class="recent-post-item">
+  {{- if $cover }}
+  <div class="post_cover {{ $side }}">
+    <a href="{{ $p.RelPermalink }}" title="{{ $p.Title }}">
+      <img class="post-bg" src="{{ $cover }}" alt="{{ $p.Title }}">
+    </a>
+  </div>
+  {{- else }}
+  {{- $g := add (mod (len $p.Title) 6) 1 }}
+  <div class="post_cover {{ $side }}">
+    <a href="{{ $p.RelPermalink }}" title="{{ $p.Title }}">
+      <div class="post-bg cover-grad-{{ $g }}"><span class="cover-title">{{ $p.Title }}</span></div>
+    </a>
+  </div>
+  {{- end }}
+  <div class="recent-post-info">
+    <a class="article-title" href="{{ $p.RelPermalink }}" title="{{ $p.Title }}">{{ $p.Title }}</a>
+    <div class="article-meta-wrap">
+      <span class="post-meta-date">
+        <i class="far fa-calendar-alt"></i>
+        <span class="article-meta-label">发表于</span>
+        <time datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}" title="发表于 {{ $p.Date.Format "2006-01-02 15:04:05" }}">{{ $p.Date.Format "2006-01-02" }}</time>
+        {{- if ne ($p.Lastmod.Format "2006-01-02") ($p.Date.Format "2006-01-02") }}
+        <span class="article-meta-separator">|</span>
+        <i class="fas fa-history"></i>
+        <span class="article-meta-label">更新于</span>
+        <time datetime="{{ $p.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}" title="更新于 {{ $p.Lastmod.Format "2006-01-02 15:04:05" }}">{{ $p.Lastmod.Format "2006-01-02" }}</time>
+        {{- end }}
+      </span>
+      {{- with $p.Params.tags }}
+      <span class="article-meta tags">
+        <span class="article-meta-separator">|</span>
+        {{- range $k, $t := . }}{{ if $k }}<span class="article-meta-link">•</span>{{ end }}<i class="fas fa-tag"></i><a class="article-meta__tags" href="{{ printf "tags/%s/" ($t | urlize) | relURL }}">{{ $t }}</a>{{ end }}
+      </span>
+      {{- end }}
+    </div>
+    {{- with $p.Summary }}
+    <div class="content">{{ . | plainify | truncate 160 }}</div>
+    {{- end }}
+  </div>
+</article>

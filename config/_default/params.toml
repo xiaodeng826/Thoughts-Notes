@@ -134,3 +134,24 @@ fingerprintAlgorithm = "sha512"
 
 # [fathomAnalytics]
 #   # site = ""
+
+# ===== 蝴蝶风格主题参数 =====
+[butterfly]
+  siteName = "不知眠的记录本"
+  subtitle = "记录、思考"
+  author = "不知眠"
+  description = "不知眠的记录本：记录、思考。"
+  avatar = "img/avatar.png"
+  background = "img/background.jpg"
+  logo = ""
+  announcement = "这里是我的长期记录本。慢一点没关系，重要的是——**一直在写**。"
+  showAnnouncement = true
+  github = "https://github.com/xiaodeng826"
+  since = "2026"
+  hideAsideByDefault = false
+
+  # ---- 特效开关 ----
+  busuanzi = true      # 访问量统计
+  canvasNest = true    # 背景粒子连线
+  fireworks = true     # 鼠标点击烟花
+  pjax = true          # 无刷新跳转

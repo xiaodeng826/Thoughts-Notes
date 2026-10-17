@@ -1,0 +1,181 @@
+/* ============================================================
+   蝴蝶复刻主题 · 自定义补充样式
+   （主题内核 index.css 不动，这里只做覆盖与补充）
+   ============================================================ */
+
+/* ---------- 1. 渐变封面（没有封面图时使用） ---------- */
+.cover-grad-1 { background: linear-gradient(135deg, #49b1f5 0%, #667eea 55%, #764ba2 100%); }
+.cover-grad-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.cover-grad-3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.cover-grad-4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.cover-grad-5 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+.cover-grad-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+/* 渐变封面在卡片里铺满 */
+.recent-post-item .post_cover .post-bg.cover-grad-1,
+.recent-post-item .post_cover .post-bg.cover-grad-2,
+.recent-post-item .post_cover .post-bg.cover-grad-3,
+.recent-post-item .post_cover .post-bg.cover-grad-4,
+.recent-post-item .post_cover .post-bg.cover-grad-5,
+.recent-post-item .post_cover .post-bg.cover-grad-6 {
+  display: flex; align-items: center; justify-content: center;
+  background-size: cover; background-position: center;
+}
+/* 封面上压一个标题字，避免纯色块太空 */
+.cover-title {
+  color: #fff; font-size: 1.5rem; font-weight: 700; letter-spacing: .06em;
+  text-shadow: 0 2px 12px rgba(0,0,0,.35); padding: 0 1.2rem; text-align: center;
+  opacity: .92;
+}
+
+/* 归档时间线的缩略图 */
+.article-sort-item-img .cover-grad-1,
+.article-sort-item-img .cover-grad-2,
+.article-sort-item-img .cover-grad-3,
+.article-sort-item-img .cover-grad-4,
+.article-sort-item-img .cover-grad-5,
+.article-sort-item-img .cover-grad-6 {
+  width: 100%; height: 100%; border-radius: 6px;
+}
+
+/* 侧栏「最新文章」小缩略图 */
+.aside-list-item .thumbnail .cover-grad-1,
+.aside-list-item .thumbnail .cover-grad-2,
+.aside-list-item .thumbnail .cover-grad-3,
+.aside-list-item .thumbnail .cover-grad-4,
+.aside-list-item .thumbnail .cover-grad-5,
+.aside-list-item .thumbnail .cover-grad-6 {
+  width: 100%; height: 100%; border-radius: 6px;
+}
+
+/* 上一篇/下一篇的色块封面 */
+#pagination .pagination-related .cover.cover-grad-1,
+#pagination .pagination-related .cover.cover-grad-2,
+#pagination .pagination-related .cover.cover-grad-3,
+#pagination .pagination-related .cover.cover-grad-4,
+#pagination .pagination-related .cover.cover-grad-5,
+#pagination .pagination-related .cover.cover-grad-6 {
+  width: 100%; height: 100%;
+}
+
+/* ---------- 2. 中文正文：首行缩进（保留你原来的写作习惯） ---------- */
+#article-container > p {
+  text-indent: 2em;
+}
+#article-container > p:has(> img:only-child) {
+  text-indent: 0;
+}
+
+/* ---------- 3. 正文可读性微调 ---------- */
+#article-container {
+  font-size: 16px;
+  line-height: 1.9;
+  word-break: break-word;
+}
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4 {
+  font-weight: 700;
+}
+#article-container img {
+  border-radius: 8px;
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+}
+/* Hugo 的代码块（还没经过 highlight 插件包装时的兜底） */
+#article-container pre {
+  background: #f6f8fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  overflow: auto;
+  font-family: consolas, Menlo, monospace;
+  font-size: .92em;
+  line-height: 1.7;
+}
+[data-theme="dark"] #article-container pre {
+  background: #1a1a1a;
+}
+#article-container pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ---------- 4. 表格 / 引用 ---------- */
+#article-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: .95em;
+}
+#article-container table th,
+#article-container table td {
+  border: 1px solid var(--light-grey);
+  padding: 8px 12px;
+}
+#article-container table th {
+  background: rgba(73,177,245,.1);
+}
+
+/* ---------- 5. 首页渐入，避免生硬 ---------- */
+.recent-post-item {
+  animation: btfFadeUp .5s ease both;
+}
+@keyframes btfFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.recent-post-item:nth-child(2) { animation-delay: .05s; }
+.recent-post-item:nth-child(3) { animation-delay: .1s; }
+.recent-post-item:nth-child(4) { animation-delay: .15s; }
+.recent-post-item:nth-child(5) { animation-delay: .2s; }
+
+/* ---------- 6. 昵称/描述字号 ---------- */
+.author-info-name { font-size: 1.15rem; font-weight: 700; }
+.author-info-description { font-size: .85rem; line-height: 1.6; }
+
+
+/* ---------- 7. 上下篇导航：色块封面 + 文字居中叠放 ---------- */
+#pagination.pagination-post .pagination-related {
+  position: relative;
+  overflow: hidden;
+}
+#pagination.pagination-post .pagination-related .cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .95;
+}
+#pagination.pagination-post .pagination-related .info {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 26px;
+}
+#pagination.pagination-post .pagination-related .info .info-item-1 {
+  color: rgba(255,255,255,.82);
+  font-size: .82rem;
+  letter-spacing: .08em;
+}
+#pagination.pagination-post .pagination-related .info .info-item-2 {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+
+/* ---------- 8. 目录卡片展开态更清楚 ---------- */
+#card-toc.is-expand .item-headline span,
+#card-toc .toc-content.is-expand {
+  display: block;
+}
+#card-toc .toc-content.is-expand {
+  max-height: 60vh;
+  overflow: auto;
+}

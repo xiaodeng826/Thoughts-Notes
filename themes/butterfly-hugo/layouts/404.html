@@ -1,0 +1,14 @@
+{{ define "header" }}
+{{- $b := site.Params.butterfly -}}
+<header class="not-home-page" id="page-header" style="background-image: url({{ partial "funcs/imgurl.html" ($b.background | default "img/background.jpg") }})">
+  {{ partial "nav.html" . }}
+  <div id="page-site-info"><h1 id="site-title">404</h1></div>
+</header>
+{{ end }}
+{{ define "main" }}
+<div id="archive" style="text-align:center;padding:80px 20px">
+  <div style="font-size:64px;font-weight:700;color:var(--btn-bg)">404</div>
+  <p style="margin:16px 0 24px">页面走丢了</p>
+  <a class="card-category-list-link" href="{{ "" | relURL }}" style="display:inline-block;padding:8px 22px;border-radius:8px;background:var(--btn-bg);color:#fff">回到首页</a>
+</div>
+{{ end }}

@@ -1,0 +1,66 @@
+{{- $b := site.Params.butterfly -}}
+{{- $posts := where site.RegularPages "Section" "!=" "" -}}
+<div class="aside-content" id="aside-content">
+  <div class="card-widget card-info text-center">
+    <div class="avatar-img"><img src="{{ partial "funcs/imgurl.html" ($b.avatar | default "img/avatar.png") }}" alt="avatar"></div>
+    <div class="author-info-name">{{ $b.author | default $b.siteName }}</div>
+    <div class="author-info-description">{{ $b.description | default site.Params.description }}</div>
+    <div class="site-data">
+      <a href="{{ "archives/" | relURL }}"><div class="headline">文章</div><div class="length-num">{{ len $posts }}</div></a>
+      <a href="{{ "tags/" | relURL }}"><div class="headline">标签</div><div class="length-num">{{ len site.Taxonomies.tags }}</div></a>
+      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Taxonomies.categories }}</div></a>
+    </div>
+    {{- with $b.github }}
+    <a id="card-info-btn" target="_blank" rel="noopener" href="{{ . }}"><i class="fab fa-github"></i><span>Follow Me</span></a>
+    {{- end }}
+  </div>
+
+  {{- if and $b.showAnnouncement $b.announcement }}
+  <div class="card-widget card-announcement">
+    <div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div>
+    <div class="announcement_content">{{ $b.announcement | markdownify }}</div>
+  </div>
+  {{- end }}
+
+  <div class="sticky_layout">
+    {{- if eq .Kind "page" }}{{ partial "toc.html" . }}{{ end }}
+
+    <div class="card-widget card-recent-post">
+      <div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div>
+      <div class="aside-list">
+        {{- range first 5 $posts.ByDate.Reverse }}
+        {{- $g := add (mod (len .Title) 6) 1 }}
+        <div class="aside-list-item">
+          <a class="thumbnail" href="{{ .RelPermalink }}" title="{{ .Title }}"><div class="cover-grad-{{ $g }}"></div></a>
+          <div class="content">
+            <a class="title" href="{{ .RelPermalink }}" title="{{ .Title }}">{{ .Title }}</a>
+            <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
+          </div>
+        </div>
+        {{- end }}
+      </div>
+    </div>
+
+    {{- with site.Taxonomies.categories }}
+    <div class="card-widget card-categories">
+      <div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div>
+      <ul class="card-category-list">
+        {{- range $name, $taxonomy := site.Taxonomies.categories }}
+        <li class="card-category-list-item"><a class="card-category-list-link" href="{{ printf "categories/%s/" ($name | urlize) | relURL }}"><span class="card-category-list-name">{{ $name }}</span><span class="card-category-list-count">{{ len $taxonomy }}</span></a></li>
+        {{- end }}
+      </ul>
+    </div>
+    {{- end }}
+
+    {{- with site.Taxonomies.tags }}
+    <div class="card-widget card-tags">
+      <div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div>
+      <div class="card-tag-cloud">
+        {{- range $name, $taxonomy := site.Taxonomies.tags }}
+        <a href="/tags/{{ $name | urlize }}/">{{ $name }}</a>
+        {{- end }}
+      </div>
+    </div>
+    {{- end }}
+  </div>
+</div>

@@ -1,0 +1,29 @@
+{{- $b := site.Params.butterfly -}}
+{{- $icons := dict "文章" "fas fa-book" "LLM" "fas fa-brain" "随笔" "fas fa-pen-nib" "标签" "fas fa-tags" "分类" "fas fa-folder-open" "关于" "fas fa-user" "归档" "fas fa-archive" "首页" "fas fa-home" -}}
+<div id="sidebar">
+  <div id="menu-mask"></div>
+  <div id="sidebar-menus">
+    <div class="avatar-img text-center">
+      <img src="{{ partial "funcs/imgurl.html" ($b.avatar | default "img/avatar.png") }}" alt="avatar">
+    </div>
+    <div class="site-data text-center">
+      <a href="{{ "archives/" | relURL }}"><div class="headline">文章</div><div class="length-num">{{ len (where site.RegularPages "Section" "!=" "") }}</div></a>
+      <a href="{{ "tags/" | relURL }}"><div class="headline">标签</div><div class="length-num">{{ len site.Taxonomies.tags }}</div></a>
+      <a href="{{ "categories/" | relURL }}"><div class="headline">分类</div><div class="length-num">{{ len site.Taxonomies.categories }}</div></a>
+    </div>
+    <div class="menus_items">
+      <div class="menus_item">
+        <a class="site-page" href="{{ site.Home.RelPermalink }}"><i class="fa-fw fas fa-home"></i><span> 首页</span></a>
+      </div>
+      {{ range site.Menus.main.ByWeight }}
+        {{ if .Children }}
+          {{ range .Children }}
+            <div class="menus_item"><a class="site-page" href="{{ .URL }}"><i class="fa-fw {{ index $icons .Name | default "fas fa-link" }}"></i><span> {{ .Name }}</span></a></div>
+          {{ end }}
+        {{ else }}
+          <div class="menus_item"><a class="site-page" href="{{ .URL }}"><i class="fa-fw {{ index $icons .Name | default "fas fa-link" }}"></i><span> {{ .Name }}</span></a></div>
+        {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
