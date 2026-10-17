@@ -250,22 +250,27 @@ function safeRel(rel) {
 // 否则行首空格被吃掉、编号也不会有列表缩进。
 // 同时避免 4 个以上空格被解析成代码块。
 function normalizeLists(text) {
-  // 目标：把"手打编号 + 空格缩进"规整成真正的 Markdown 有序列表。
-  // 三件事：① 列表前补空行（否则不会被识别成列表）
-  //        ② 收敛行首缩进（4+ 空格会被当代码块，3 空格会被当上一项续行）
-  //        ③ 列表后补空行并去掉缩进（否则后续段落会被吸进最后一个列表项）
+  // 把"手打编号 + 缩进"规整成真正的 Markdown 有序列表。
+  // 支持：1 xxx / 1、xxx / 1. xxx（中文写作里数字后常常不加点）
+  // 只有形成 1,2,3… 递增序列时才转换，避免把 "2026 年" 这类正文误判成列表。
   const lines = String(text || "").split(/\r?\n/);
   const out = [];
   let inFence = false;
-  let lastNonBlankWasList = false;   // 只被"非空行"改变，空行不重置
-  const isList = function (l) { return /^\s*(?:\d+\.|[-*+])\s*\S/.test(l); };
+  let lastNonBlankWasList = false;
+  let seqNext = 0;
+  const isMdList = function (l) { return /^\s*(?:\d+\.|[-*+])\s+\S/.test(l); };
+  const manualNum = function (l) {
+    const m = /^(\s*)(\d{1,2})(?:\s*[.、]\s*(?!\d)|\s+)(\S.*)$/.exec(l);
+    return m ? { num: Number(m[2]), rest: m[3].trim() } : null;
+  };
+
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
-    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; out.push(line); lastNonBlankWasList = false; continue; }
+    if (/^\s*(```|~~~)/.test(line)) { inFence = !inFence; out.push(line); lastNonBlankWasList = false; seqNext = 0; continue; }
     if (inFence) { out.push(line); continue; }
     if (line.trim() === "") { out.push(line); continue; }
 
-    if (isList(line)) {
+    if (isMdList(line)) {
       const prev = out.length ? out[out.length - 1] : "";
       if (prev.trim() !== "" && !lastNonBlankWasList) out.push("");
       line = line.replace(/^ {4,}/, "");
@@ -273,15 +278,34 @@ function normalizeLists(text) {
       line = line.replace(/^(\s*)([-*+])\s+(?=\S)/, "$1$2 ");
       out.push(line);
       lastNonBlankWasList = true;
-    } else {
-      if (lastNonBlankWasList) {
-        const prev = out.length ? out[out.length - 1] : "";
-        if (prev.trim() !== "") out.push("");
-        line = line.replace(/^ {1,}/, "");
-      }
-      out.push(line);
-      lastNonBlankWasList = false;
+      seqNext = 0;
+      continue;
     }
+
+    const mn = manualNum(line);
+    if (mn && (mn.num === 1 || (seqNext && mn.num === seqNext))) {
+      const prev = out.length ? out[out.length - 1] : "";
+      if (prev.trim() !== "" && !lastNonBlankWasList) out.push("");
+      out.push(mn.num + ". " + mn.rest);
+      lastNonBlankWasList = true;
+      seqNext = mn.num + 1;
+      continue;
+    }
+
+    // 列表项的续行：缩进 ≥2 空格时保留为该项的第二行
+    if (lastNonBlankWasList && /^\s{2,}\S/.test(line)) {
+      out.push("  " + line.trim());
+      continue;
+    }
+
+    if (lastNonBlankWasList) {
+      const prev = out.length ? out[out.length - 1] : "";
+      if (prev.trim() !== "") out.push("");
+      line = line.replace(/^ {1,}/, "");
+    }
+    out.push(line);
+    lastNonBlankWasList = false;
+    seqNext = 0;
   }
   return out.join("\n");
 }

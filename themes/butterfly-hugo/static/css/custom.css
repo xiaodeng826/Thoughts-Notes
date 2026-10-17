@@ -211,3 +211,53 @@
 }
 .article-sort-item.year a { color: inherit; }
 .article-sort-item.year a:hover { color: var(--btn-bg); }
+
+
+/* ---------- 10. 去掉标题前的锚点图标（🔗），标题左对齐 ---------- */
+.container.post-content h1:before,
+.container.post-content h2:before,
+.container.post-content h3:before,
+.container.post-content h4:before,
+.container.post-content h5:before,
+.container.post-content h6:before {
+  content: none !important;
+  display: none !important;
+}
+.container.post-content h1,
+.container.post-content h2,
+.container.post-content h3,
+.container.post-content h4,
+.container.post-content h5,
+.container.post-content h6,
+.container.post-content h1:hover,
+.container.post-content h2:hover,
+.container.post-content h3:hover,
+.container.post-content h4:hover,
+.container.post-content h5:hover,
+.container.post-content h6:hover {
+  padding-left: 0 !important;
+}
+
+/* 有序列表：让编号和正文对齐更清楚（中文长文本换行时悬挂缩进） */
+#article-container ol {
+  padding-left: 1.6em;
+}
+#article-container ol > li {
+  padding-left: .2em;
+  margin: .35em 0;
+}
+#article-container ol > li > p {
+  text-indent: 0;
+  margin: .2em 0;
+}
+
+
+/* ---------- 11. 目录里超长标题截断，避免撑破侧栏 ---------- */
+#card-toc .toc-content .toc-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
